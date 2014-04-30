@@ -1,0 +1,29 @@
+{ "name": "hopper"
+, "version": "0.0.1-pre"
+, "description": "An interpreter for the Grace programming language"
+, "main": "lib/hopper.js"
+, "bin": "bin/hopper.js"
+, "scripts":
+  { "test": "test/harness.js"
+  }
+, "repository":
+  { "type": "git"
+  , "url": "git://github.com/zmthy/hopper.git"
+  }
+, "keywords":
+  [ "grace"
+  , "language"
+  , "interpreter"
+  ]
+, "author":
+  { "name": "Timothy Jones"
+  , "email": "tim@zmthy.io"
+  , "url": "http://zmthy.io"
+  }
+, "license": "MIT"
+, "bugs":
+  { "url": "https://github.com/zmthy/hopper/issues"
+  , "email": "git@zmthy.io"
+  }
+}
+
