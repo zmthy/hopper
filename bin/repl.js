@@ -2,12 +2,18 @@
 
 "use strict";
 
-var hopper, runtime;
+var asString, hopper, interpreter, stderr, stdin, stdout, runtime, undefined;
+
+function asString(object) {
+  if (object.toString === Object.prototype.toString) {
+    return runtime.Object.prototype.asString.call(object);
+  } else {
+    return object.toString();
+  }
+}
 
 hopper = require("../lib/hopper");
 runtime = require("../lib/runtime");
-
-var interpreter, stderr, stdin, stdout, undefined;
 
 stderr = process.stderr;
 stdin = process.stdin;
@@ -38,7 +44,7 @@ stdin.on("readable", function() {
         stderr.write("\x1b[0;31;48m" + (typeof error === "string" ?
           error : "Internal error: " + error.message) + "\x1b[0m\n");
       } else if (result !== runtime.done) {
-        stdout.write("\x1b[0;32;48m" + result.toString() + "\x1b[0m\n");
+        stdout.write("\x1b[0;32;48m" + asString(result) + "\x1b[0m\n");
       }
 
       stdout.write("> ");
