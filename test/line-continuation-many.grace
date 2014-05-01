@@ -1,0 +1,4 @@
+object { method name {} }
+
+    .name
+
