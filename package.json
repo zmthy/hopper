@@ -3,6 +3,9 @@
 , "description": "An interpreter for the Grace programming language"
 , "main": "lib/hopper.js"
 , "bin": "bin/hopper.js"
+, "dependencies":
+  { "setimmediate": "*"
+  }
 , "scripts":
   { "test": "test/harness.js"
   }
