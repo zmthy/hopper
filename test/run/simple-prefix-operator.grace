@@ -1,0 +1,2 @@
+!object { method prefix! {} }
+

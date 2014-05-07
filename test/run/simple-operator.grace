@@ -1,0 +1,2 @@
+object { method !(rhs) {} } ! object {}
+
