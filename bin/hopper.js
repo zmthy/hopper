@@ -4,7 +4,7 @@
 
 "use strict";
 
-var argv, fname, fs, hopper, stderr;
+var async, argv, fname, fs, hopper, offset, stderr, undefined;
 
 function writeError(error) {
   stderr.write("\x1b[0;31;48m" + error + "\x1b[0m\n");
@@ -13,7 +13,17 @@ function writeError(error) {
 argv = process.argv;
 stderr = process.stderr;
 
-fname = argv[argv[0] == "node" ? 2 : 1];
+offset = argv[0] === "node" ? 1 : 0;
+fname = argv[1 + offset];
+
+if (fname[0] === "-") {
+  if (fname === "-a" || fname === "--async") {
+    async = true;
+    fname = argv[2 + offset];
+  } else {
+    throw "Unrecognised flag " + fname;
+  }
+}
 
 if (fname === undefined) {
   require("./repl");
@@ -25,11 +35,19 @@ if (fname === undefined) {
     if (error !== null) {
       writeError(error.message);
     } else {
-      hopper.interpret(code, function(error) {
-        if (error !== null) {
+      if (async) {
+        hopper.interpret(code, function(error) {
+          if (error !== null) {
+            writeError(error);
+          }
+        });
+      } else {
+        try {
+          hopper.interpret(code);
+        } catch(error) {
           writeError(error);
         }
-      });
+      }
     }
   });
 }
