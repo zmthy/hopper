@@ -14,9 +14,10 @@ argv = process.argv;
 stderr = process.stderr;
 
 offset = argv[0] === "node" ? 1 : 0;
+async = false;
 fname = argv[1 + offset];
 
-if (fname[0] === "-") {
+if (typeof fname === "string" && fname[0] === "-") {
   if (fname === "-a" || fname === "--async") {
     async = true;
     fname = argv[2 + offset];
@@ -26,7 +27,7 @@ if (fname[0] === "-") {
 }
 
 if (fname === undefined) {
-  require("./repl");
+  require("./repl")(async);
 } else {
   fs = require("fs");
   hopper = require("../lib/hopper");

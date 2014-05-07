@@ -2,7 +2,7 @@
 
 "use strict";
 
-var asString, hopper, interpreter, stderr, stdin, stdout, runtime, undefined;
+var hopper, stderr, stdin, stdout, runtime, undefined;
 
 function asString(object) {
   if (object.toString === Object.prototype.toString) {
@@ -12,6 +12,17 @@ function asString(object) {
   }
 }
 
+function writeValue(value) {
+  if (value !== runtime.done) {
+    stdout.write("\x1b[0;32;48m" + asString(value) + "\x1b[0m\n");
+  }
+}
+
+function writeError(error) {
+  stderr.write("\x1b[0;31;48m" + (typeof error === "string" ?
+    error : "Internal error: " + error.message) + "\x1b[0m\n");
+}
+
 hopper = require("../lib/hopper");
 runtime = require("../lib/runtime");
 
@@ -19,38 +30,57 @@ stderr = process.stderr;
 stdin = process.stdin;
 stdout = process.stdout;
 
-interpreter = new hopper.Interpreter();
-
 stdin.setEncoding("utf8");
-stdout.write("> ");
 
-stdin.on("readable", function() {
-  var chunk, line, result;
+module.exports = function(async) {
+  var interpreter = new hopper.Interpreter(async);
 
-  if ((chunk = stdin.read()) === null) {
-    return;
-  }
+  stdout.write("> ");
 
-  line = "";
+  function loop() {
+    var chunk, line, result;
 
-  while (chunk !== null) {
-    line += chunk;
-    chunk = stdin.read();
-  }
+    if ((chunk = stdin.read()) === null) {
+      return;
+    }
 
-  if (line.replace(/\s/g, "") !== "") {
-    interpreter.interpret(line, function(error, result) {
-      if (error !== null) {
-        stderr.write("\x1b[0;31;48m" + (typeof error === "string" ?
-          error : "Internal error: " + error.message) + "\x1b[0m\n");
-      } else if (result !== runtime.done) {
-        stdout.write("\x1b[0;32;48m" + asString(result) + "\x1b[0m\n");
+    line = "";
+
+    while (chunk !== null) {
+      line += chunk;
+
+      chunk = stdin.read();
+    }
+
+    if (line.replace(/\s/g, "") !== "") {
+      if (async) {
+        interpreter.interpret(line, function(error, result) {
+          if (error !== null) {
+            writeError(error);
+          } else {
+            writeValue(result);
+          }
+
+          stdout.write("> ");
+        });
+      } else {
+        try {
+          writeValue(interpreter.interpret(line));
+        } catch(error) {
+          writeError(error);
+        }
       }
+    }
 
+    if (!async) {
       stdout.write("> ");
-    });
-  } else {
-    stdout.write("> ");
+    }
   }
-});
+
+  stdin.on("readable", loop);
+
+  return function () {
+    stdin.removeListener("readable", loop);
+  };
+};
 
