@@ -8,18 +8,28 @@
 
 "use strict";
 
-var async, fs, hopper, path, stderr, stdout, undefined;
+var async, fail, fs, hopper, pass, path, stdout, summary, undefined;
 
 function writeTest(file) {
   stdout.write("Test " + file + ": ");
 }
 
-function writeSuccess() {
-  stdout.write("\x1b[0;32;48mPassed\x1b[0m\n");
+function writeSuccess(message) {
+  stdout.write("\x1b[0;32;48m" + message + "\x1b[0m\n");
+}
+
+function writePass() {
+  pass++;
+  writeSuccess("Passed");
 }
 
 function writeError(error) {
-  stderr.write("\x1b[0;31;48m" + error + "\x1b[0m\n");
+  stdout.write("\x1b[0;31;48m" + error + "\x1b[0m\n");
+}
+
+function writeFailure(reason) {
+  fail++;
+  writeError(reason);
 }
 
 function runSync(code, callback) {
@@ -28,7 +38,7 @@ function runSync(code, callback) {
     callback(null);
   } catch(error) {
     if (error instanceof Error) {
-      writeError(error);
+      writeFailure(error);
     } else {
       callback(error);
     }
@@ -39,7 +49,7 @@ function runAsync(code, callback) {
   try {
     hopper.interpret(code, callback);
   } catch(error) {
-    writeError(error);
+    writeFailure(error);
   }
 }
 
@@ -86,7 +96,7 @@ function runTests(dir, callback, completion) {
     }
 
     if (error !== null) {
-      writeError(error.message);
+      writeFailure(error.message);
     } else {
       i = 0;
       l = files.length;
@@ -95,33 +105,54 @@ function runTests(dir, callback, completion) {
   });
 }
 
+function summarise() {
+  var i, l, tests;
+
+  stdout.write("\n");
+  for (i = 0, l = summary.length; i < l; i++) {
+    tests = summary[i];
+    (tests[1] === 0 ? writeSuccess : writeError)
+      (tests[0] + " / " + (tests[0] + tests[1]) + " tests " + tests[2]);
+  }
+}
+
 fs = require("fs");
 path = require("path");
 hopper = require("../lib/hopper");
 
-stderr = process.stderr;
 stdout = process.stdout;
 
 process.on("uncaughtException", function(error) {
-  writeError(error);
+  writeFailure(error);
   async();
 });
 
 stdout.write("Executing tests...\n");
 
+summary = [];
+pass = 0;
+fail = 0;
+
 runTests("run", function(error) {
   if (error !== null) {
-    writeError(error);
+    writeFailure(error);
   } else {
-    writeSuccess();
+    writePass();
   }
 }, function() {
+  summary.push([pass, fail, "passed as required"]);
+  pass = 0;
+  fail = 0;
+
   runTests("fail", function(error) {
     if (error !== null) {
-      writeSuccess();
+      writePass();
     } else {
-      writeError("Failed (completed without error)");
+      writeFailure("Failed (completed without error)");
     }
+  }, function() {
+    summary.push([pass, fail, "failed as required"]);
+    summarise();
   });
 });
 
