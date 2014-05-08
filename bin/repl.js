@@ -6,16 +6,14 @@ var hopper, stderr, stdin, stdout, runtime, undefined;
 
 function asString(object) {
   if (object.toString === Object.prototype.toString) {
-    return runtime.Object.prototype.asString.call(object);
+    return runtime.Object.prototype.toString.call(object);
   } else {
     return object.toString();
   }
 }
 
 function writeValue(value) {
-  if (value !== runtime.done) {
-    stdout.write("\x1b[0;32;48m" + asString(value) + "\x1b[0m\n");
-  }
+  stdout.write("\x1b[0;32;48m" + asString(value) + "\x1b[0m\n");
 }
 
 function writeError(error) {
