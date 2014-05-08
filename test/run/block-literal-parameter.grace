@@ -1,0 +1,4 @@
+method name(block) {}
+
+name {}
+
