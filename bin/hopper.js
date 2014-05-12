@@ -13,6 +13,10 @@ function writeError(error) {
 argv = process.argv;
 stderr = process.stderr;
 
+process.on('uncaughtException', function(error) {
+  writeError(error);
+});
+
 offset = argv[0] === "node" ? 1 : 0;
 async = false;
 fname = argv[1 + offset];
@@ -43,11 +47,7 @@ if (fname === undefined) {
           }
         });
       } else {
-        try {
-          hopper.interpret(code);
-        } catch(error) {
-          writeError(error);
-        }
+        hopper.interpret(code);
       }
     }
   });

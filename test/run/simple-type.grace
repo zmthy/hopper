@@ -1,0 +1,4 @@
+type {
+    name(param)
+}
+
