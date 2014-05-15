@@ -2,7 +2,9 @@
 
 "use strict";
 
-var hopper, stderr, stdin, stdout, runtime, unicode, undefined;
+var hopper, stderr, stdin, stdout, readline, runtime, unicode, undefined;
+
+readline = require("readline");
 
 hopper = require("../lib/hopper");
 runtime = require("../lib/runtime");
@@ -34,25 +36,18 @@ stdout = process.stdout;
 stdin.setEncoding("utf8");
 
 module.exports = function(async) {
-  var interpreter = new hopper.Interpreter(async);
+  var interpreter, rl;
 
-  stdout.write("> ");
+  interpreter = new hopper.Interpreter(async);
 
-  function loop() {
-    var chunk, line, result;
+  rl = readline.createInterface({
+    input: stdin,
+    output: stdout,
+  });
 
-    if ((chunk = stdin.read()) === null) {
-      return;
-    }
+  rl.setPrompt("> ", 2);
 
-    line = "";
-
-    while (chunk !== null) {
-      line += chunk;
-
-      chunk = stdin.read();
-    }
-
+  rl.on("line", function(line) {
     if (line.replace(/\s/g, "") !== "") {
       if (async) {
         interpreter.interpret(line, function(error, result) {
@@ -62,26 +57,26 @@ module.exports = function(async) {
             writeValue(result);
           }
 
-          stdout.write("> ");
+          rl.prompt();
         });
       } else {
         try {
           writeValue(interpreter.interpret(line));
         } catch(error) {
           writeError(error);
+        } finally {
+          rl.prompt();
         }
       }
+    } else {
+      rl.prompt();
     }
+  });
 
-    if (!async) {
-      stdout.write("> ");
-    }
-  }
+  rl.prompt();
 
-  stdin.on("readable", loop);
-
-  return function () {
-    stdin.removeListener("readable", loop);
+  return function() {
+    rl.close();
   };
 };
 
