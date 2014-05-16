@@ -80,19 +80,19 @@ function runTests(dir, callback, completion) {
     function run() {
       var file;
 
-      if (i === l) {
-        if (typeof completion === "function") {
-          completion();
+      do {
+        if (i === l) {
+          if (typeof completion === "function") {
+            completion();
+          }
+
+          return;
         }
 
-        return;
-      }
+        file = files[i++];
+      } while(path.extname(file) !== ".grace");
 
-      file = files[i++];
-
-      if (path.extname(file) === ".grace") {
-        fs.readFile(path.join("test/" + dir, file), runTest(file, callback, run));
-      }
+      fs.readFile(path.join("test/" + dir, file), runTest(file, callback, run));
     }
 
     if (error !== null) {

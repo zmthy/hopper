@@ -1,0 +1,2 @@
+method name(_) {}
+
