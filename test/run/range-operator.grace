@@ -1,0 +1,4 @@
+method ..(_) {}
+
+self .. self
+
