@@ -1,2 +1,2 @@
-{ _ : type {} -> object {} }
+{ _ : type {} -> object {} }.apply(object {})
 

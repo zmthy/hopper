@@ -1,4 +1,4 @@
 method name(_) {}
 
-name(object {})
+name
 

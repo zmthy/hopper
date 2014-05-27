@@ -1,2 +1,2 @@
-{ _ -> object {} }
+{ _ -> object {} }.apply(object {})
 
