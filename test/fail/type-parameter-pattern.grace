@@ -1,4 +1,0 @@
-type {
-    name(param : object {})
-}
-
