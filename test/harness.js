@@ -8,7 +8,7 @@
 
 "use strict";
 
-var async, fail, fs, hopper, pass, path, stdout, summary, undefined;
+var async, exitCode, fail, fs, hopper, pass, path, stdout, summary, undefined;
 
 function writeTest(file) {
   stdout.write("Test " + file + ": ");
@@ -125,6 +125,16 @@ stdout = process.stdout;
 process.on("uncaughtException", function(error) {
   writeFailure(error);
   async();
+});
+
+process.on("exit", function() {
+  var i, l;
+
+  for (i = 0, l = summary.length; i < l; i++) {
+    if (summary[i][1] > 0) {
+      process.exit(1);
+    }
+  }
 });
 
 stdout.write("Executing tests...\n");
