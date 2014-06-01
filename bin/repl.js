@@ -2,7 +2,7 @@
 
 "use strict";
 
-var hopper, stderr, stdin, stdout, readline, runtime, unicode, undefined;
+var hopper, stderr, stdin, stdout, readline, runtime, unicode;
 
 readline = require("readline");
 
@@ -13,11 +13,13 @@ unicode = require("../lib/unicode");
 function asString(object) {
   if (object instanceof runtime.String) {
     return "\"" + unicode.escape(object.toString()) + "\"";
-  } else if (object.toString === Object.prototype.toString) {
-    return runtime.Object.prototype.toString.call(object);
-  } else {
-    return object.toString();
   }
+
+  if (object.toString === Object.prototype.toString) {
+    return runtime.Object.prototype.toString.call(object);
+  }
+
+  return object.toString();
 }
 
 function writeValue(value) {
@@ -26,7 +28,7 @@ function writeValue(value) {
 
 function writeError(error) {
   stderr.write("\x1b[0;31;48m" + (typeof error === "string" ?
-    error : "Internal error: " + error.message) + "\x1b[0m\n");
+      error : "Internal error: " + error.message) + "\x1b[0m\n");
 }
 
 stderr = process.stderr;
@@ -35,7 +37,7 @@ stdout = process.stdout;
 
 stdin.setEncoding("utf8");
 
-module.exports = function(async) {
+module.exports = function (async) {
   var interpreter, rl;
 
   interpreter = new hopper.Interpreter(async);
@@ -47,10 +49,10 @@ module.exports = function(async) {
 
   rl.setPrompt("> ", 2);
 
-  rl.on("line", function(line) {
+  rl.on("line", function (line) {
     if (line.replace(/\s/g, "") !== "") {
       if (async) {
-        interpreter.interpret(line, function(error, result) {
+        interpreter.interpret(line, function (error, result) {
           if (error !== null) {
             writeError(error);
           } else {
@@ -62,7 +64,7 @@ module.exports = function(async) {
       } else {
         try {
           writeValue(interpreter.interpret(line));
-        } catch(error) {
+        } catch (error) {
           writeError(error);
         } finally {
           rl.prompt();
@@ -75,7 +77,7 @@ module.exports = function(async) {
 
   rl.prompt();
 
-  return function() {
+  return function () {
     rl.close();
   };
 };

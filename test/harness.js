@@ -8,7 +8,7 @@
 
 "use strict";
 
-var async, exitCode, fail, fs, hopper, pass, path, stdout, summary, undefined;
+var async, exitCode, fail, fs, hopper, pass, path, stdout, summary;
 
 function writeTest(file) {
   stdout.write("Test " + file + ": ");
@@ -19,7 +19,7 @@ function writeSuccess(message) {
 }
 
 function writePass() {
-  pass++;
+  pass += 1;
   writeSuccess("Passed");
 }
 
@@ -28,7 +28,7 @@ function writeError(error) {
 }
 
 function writeFailure(reason) {
-  fail++;
+  fail += 1;
   writeError(reason);
 }
 
@@ -36,7 +36,7 @@ function runSync(code, callback) {
   try {
     hopper.interpret(code);
     callback(null);
-  } catch(error) {
+  } catch (error) {
     if (error instanceof Error) {
       writeFailure(error);
     } else {
@@ -48,13 +48,13 @@ function runSync(code, callback) {
 function runAsync(code, callback) {
   try {
     hopper.interpret(code, callback);
-  } catch(error) {
+  } catch (error) {
     writeFailure(error);
   }
 }
 
 function runTest(file, callback, completion) {
-  return function(error, code) {
+  return function (error, code) {
     if (error !== null) {
       writeError(error.message);
     } else {
@@ -64,17 +64,17 @@ function runTest(file, callback, completion) {
       runSync(code, callback);
       writeTest(file + " (async)");
       async = completion;
-      runAsync(code, function(error) {
+      runAsync(code, function (error) {
         async = undefined;
         callback(error);
         completion();
       });
     }
-  }
+  };
 }
 
 function runTests(dir, callback, completion) {
-  fs.readdir("test/" + dir, function(error, files) {
+  fs.readdir("test/" + dir, function (error, files) {
     var i, l;
 
     function run() {
@@ -89,8 +89,9 @@ function runTests(dir, callback, completion) {
           return;
         }
 
-        file = files[i++];
-      } while(path.extname(file) !== ".grace");
+        file = files[i];
+        i += 1;
+      } while (path.extname(file) !== ".grace");
 
       fs.readFile(path.join("test/" + dir, file), runTest(file, callback, run));
     }
@@ -109,10 +110,10 @@ function summarise() {
   var i, l, tests;
 
   stdout.write("\n");
-  for (i = 0, l = summary.length; i < l; i++) {
+  for (i = 0, l = summary.length; i < l; i += 1) {
     tests = summary[i];
-    (tests[1] === 0 ? writeSuccess : writeError)
-      (tests[0] + " / " + (tests[0] + tests[1]) + " tests " + tests[2]);
+    (tests[1] === 0 ? writeSuccess : writeError)(tests[0] +
+      " / " + (tests[0] + tests[1]) + " tests " + tests[2]);
   }
 }
 
@@ -122,15 +123,15 @@ hopper = require("../lib/hopper");
 
 stdout = process.stdout;
 
-process.on("uncaughtException", function(error) {
+process.on("uncaughtException", function (error) {
   writeFailure(error);
   async();
 });
 
-process.on("exit", function() {
+process.on("exit", function () {
   var i, l;
 
-  for (i = 0, l = summary.length; i < l; i++) {
+  for (i = 0, l = summary.length; i < l; i += 1) {
     if (summary[i][1] > 0) {
       process.exit(1);
     }
@@ -143,24 +144,24 @@ summary = [];
 pass = 0;
 fail = 0;
 
-runTests("run", function(error) {
+runTests("run", function (error) {
   if (error !== null) {
     writeFailure(error);
   } else {
     writePass();
   }
-}, function() {
+}, function () {
   summary.push([pass, fail, "passed as required"]);
   pass = 0;
   fail = 0;
 
-  runTests("fail", function(error) {
+  runTests("fail", function (error) {
     if (error !== null) {
       writePass();
     } else {
       writeFailure("Failed (completed without error)");
     }
-  }, function() {
+  }, function () {
     summary.push([pass, fail, "failed as required"]);
     summarise();
   });
