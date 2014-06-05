@@ -4,7 +4,8 @@
 , "main": "lib/hopper.js"
 , "bin": "bin/hopper.js"
 , "dependencies":
-  { "setimmediate": "*"
+  { "setimmediate": "1.x"
+  , "optparse": "1.x"
   }
 , "scripts":
   { "test": "test/harness.js"

@@ -32,50 +32,31 @@ function writeFailure(reason) {
   writeError(reason);
 }
 
-function runSync(code, callback) {
-  try {
-    hopper.interpret(code);
-    callback(null);
-  } catch (error) {
-    if (error instanceof Error) {
-      writeFailure(error);
-    } else {
-      callback(error);
-    }
-  }
-}
-
-function runAsync(code, callback) {
-  try {
-    hopper.interpret(code, callback);
-  } catch (error) {
-    writeFailure(error);
-  }
-}
-
-function runTest(file, callback, completion) {
-  return function (error, code) {
-    if (error !== null) {
-      writeError(error.message);
-    } else {
-      code = code.toString();
-      file = path.basename(file, ".grace");
-      writeTest(file + " (sync)");
-      runSync(code, callback);
-      writeTest(file + " (async)");
-      async = completion;
-      runAsync(code, function (error) {
-        async = undefined;
-        callback(error);
-        completion();
-      });
-    }
+function makeLoader(prefix) {
+  return function (interpreter, file, callback) {
+    hopper.defaultLoader(interpreter,
+      path.join("test", prefix, file), callback);
   };
 }
 
+function runTest(file, loader, callback, completion) {
+  file = path.basename(file, ".grace");
+  writeTest(file + " (sync)");
+  async = completion;
+  hopper.load(file, false, loader, function (error) {
+    callback(error);
+    writeTest(file + " (async)");
+    hopper.load(file, true, loader, function (error) {
+      async = undefined;
+      callback(error);
+      completion();
+    });
+  });
+}
+
 function runTests(dir, callback, completion) {
-  fs.readdir("test/" + dir, function (error, files) {
-    var i, l;
+  fs.readdir(path.join("test", dir), function (error, files) {
+    var i, l, loader;
 
     function run() {
       var file;
@@ -93,7 +74,7 @@ function runTests(dir, callback, completion) {
         i += 1;
       } while (path.extname(file) !== ".grace");
 
-      fs.readFile(path.join("test/" + dir, file), runTest(file, callback, run));
+      runTest(file, loader, callback, run);
     }
 
     if (error !== null) {
@@ -101,6 +82,9 @@ function runTests(dir, callback, completion) {
     } else {
       i = 0;
       l = files.length;
+
+      loader = makeLoader(dir);
+
       run(0);
     }
   });
@@ -145,7 +129,9 @@ pass = 0;
 fail = 0;
 
 runTests("run", function (error) {
-  if (error !== null) {
+  if (error instanceof Error) {
+    writeFailure(error);
+  } else if (error !== null) {
     writeFailure(error);
   } else {
     writePass();
@@ -156,7 +142,9 @@ runTests("run", function (error) {
   fail = 0;
 
   runTests("fail", function (error) {
-    if (error !== null) {
+    if (error instanceof Error) {
+      writeFailure(error);
+    } else if (error !== null) {
       writePass();
     } else {
       writeFailure("Failed (completed without error)");

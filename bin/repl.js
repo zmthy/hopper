@@ -2,9 +2,10 @@
 
 "use strict";
 
-var hopper, stderr, stdin, stdout, readline, runtime, unicode;
+var hopper, readline, runtime, sys, unicode;
 
 readline = require("readline");
+sys = require("sys");
 
 hopper = require("../lib/hopper");
 runtime = require("../lib/runtime");
@@ -23,53 +24,38 @@ function asString(object) {
 }
 
 function writeValue(value) {
-  stdout.write("\x1b[0;32;48m" + asString(value) + "\x1b[0m\n");
+  sys.puts("\x1b[0;32;48m" + asString(value) + "\x1b[0m");
 }
 
 function writeError(error) {
-  stderr.write("\x1b[0;31;48m" + (typeof error === "string" ?
-      error : "Internal error: " + error.message) + "\x1b[0m\n");
+  sys.error("\x1b[0;31;48m" + (typeof error === "string" ?
+      error : "Internal error: " + error.message) + "\x1b[0m");
 }
 
-stderr = process.stderr;
-stdin = process.stdin;
-stdout = process.stdout;
-
-stdin.setEncoding("utf8");
-
-module.exports = function (async) {
+module.exports = function () {
   var interpreter, rl;
 
-  interpreter = new hopper.Interpreter(async);
+  interpreter = new hopper.Interpreter();
 
+  process.stdin.setEncoding("utf8");
   rl = readline.createInterface({
-    input: stdin,
-    output: stdout,
+    input: process.stdin,
+    output: process.stdout,
   });
 
   rl.setPrompt("> ", 2);
 
   rl.on("line", function (line) {
     if (line.replace(/\s/g, "") !== "") {
-      if (async) {
-        interpreter.interpret(line, function (error, result) {
-          if (error !== null) {
-            writeError(error);
-          } else {
-            writeValue(result);
-          }
-
-          rl.prompt();
-        });
-      } else {
-        try {
-          writeValue(interpreter.interpret(line));
-        } catch (error) {
+      interpreter.interpret(line, function (error, result) {
+        if (error !== null) {
           writeError(error);
-        } finally {
-          rl.prompt();
+        } else {
+          writeValue(result);
         }
-      }
+
+        rl.prompt();
+      });
     } else {
       rl.prompt();
     }

@@ -4,52 +4,88 @@
 
 "use strict";
 
-var async, argv, fname, fs, hopper, offset, stderr;
+var fname, hopper, interactive, interpreter,
+  loader, options, optparse, path, repl, root, sys;
+
+path = require("path");
+sys = require("sys");
+
+optparse = require("optparse");
+
+hopper = require("../lib/hopper");
+repl = require("./repl");
 
 function writeError(error) {
-  stderr.write("\x1b[0;31;48m" + error + "\x1b[0m\n");
+  sys.error("\x1b[0;31;48m" + error + "\x1b[0m");
 }
-
-argv = process.argv;
-stderr = process.stderr;
 
 process.on('uncaughtException', function (error) {
   writeError(error);
 });
 
-offset = argv[0] === "node" ? 1 : 0;
-async = false;
-fname = argv[1 + offset];
+fname = null;
+interactive = false;
+root = null;
 
-if (typeof fname === "string" && fname[0] === "-") {
-  if (fname === "-a" || fname === "--async") {
-    async = true;
-    fname = argv[2 + offset];
-  } else {
-    throw "Unrecognised flag " + fname;
+options = new optparse.OptionParser([
+  ["-h", "--help", "Display this help text"],
+  ["-r", "--root DIR", "Set the root of the module hierarchy"],
+  ["-a", "--auto-root", "Use the main module as the root"]
+]);
+
+options.on("help", function () {
+  sys.puts(options.toString());
+  process.exit(0);
+});
+
+options.on("root", function (dir) {
+  root = dir;
+});
+
+options.on("auto-root", function () {
+  root = true;
+});
+
+options.on(2, function (file) {
+  fname = file;
+});
+
+options.on(function (option) {
+  writeError("Option parse error: no such option " + option);
+  process.exit(1);
+});
+
+options.parse(process.argv);
+
+if (root === true) {
+  if (!fname) {
+    writeError("Option parse error: automatic module root without a module");
+    process.exit(2);
   }
+
+  root = path.dirname(fname);
 }
 
-if (fname === undefined) {
-  require("./repl")(async);
-} else {
-  fs = require("fs");
-  hopper = require("../lib/hopper");
+if (root !== null) {
+  if (fname !== null) {
+    fname = path.relative(root, fname);
+  }
 
-  fs.readFile(fname, { encoding: "utf8" }, function (error, code) {
+  loader = function (interpreter, file, callback) {
+    hopper.defaultLoader(interpreter, path.join(root, file), callback);
+  };
+} else {
+  loader = hopper.defaultLoader;
+}
+
+if (fname !== null) {
+  fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
+  hopper.load(fname, loader, function (error) {
     if (error !== null) {
-      writeError(error.message);
-    } else {
-      if (async) {
-        hopper.interpret(code, function (error) {
-          if (error !== null) {
-            writeError(error);
-          }
-        });
-      } else {
-        hopper.interpret(code);
-      }
+      writeError(error);
     }
   });
+} else {
+  repl();
 }
 

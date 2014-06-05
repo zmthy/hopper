@@ -17,14 +17,23 @@ REPL will load instead.
 ```javascript
 var hopper = require("hopper");
 
-hopper.interpret(grace);
+hopper.interpret(grace, callback);
 ```
 
-The `interpret` method accepts Grace code as a string. The interpreter will run
-asynchronously if passed a callback as a second argument.
+The `interpret` method accepts Grace code as a string, and a Node style
+callback.
 
 In order to interpret multiple chunks of code with preserved state, construct a
 new `Interpreter` and invoke `interpret` on that instead.
+
+You can also directly load and interpret an external module.
+
+```javascript
+hopper.load(path, callback);
+```
+
+Module resolution is controlled by an optional module loader argument, with a
+default that uses the Node.js file system interface.
 
 ## Licensing
 
