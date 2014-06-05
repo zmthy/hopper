@@ -29,6 +29,7 @@ root = null;
 
 options = new optparse.OptionParser([
   ["-h", "--help", "Display this help text"],
+  ["-i", "--interactive", "Run in interactive mode"],
   ["-r", "--root DIR", "Set the root of the module hierarchy"],
   ["-a", "--auto-root", "Use the main module as the root"]
 ]);
@@ -36,6 +37,10 @@ options = new optparse.OptionParser([
 options.on("help", function () {
   sys.puts(options.toString());
   process.exit(0);
+});
+
+options.on("interactive", function () {
+  interactive = true;
 });
 
 options.on("root", function (dir) {
@@ -80,12 +85,30 @@ if (root !== null) {
 
 if (fname !== null) {
   fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
-  hopper.load(fname, loader, function (error) {
+} else {
+  interactive = true;
+}
+
+if (interactive) {
+  interpreter = new hopper.Interpreter(loader);
+
+  if (fname !== null) {
+    interpreter.interpret('dialect "' + fname + '"', function (error) {
+      if (error !== null) {
+        writeError(error);
+      } else {
+        repl(interpreter);
+      }
+    });
+  } else {
+    repl(interpreter);
+  }
+} else {
+  fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
+  hopper.load(fname, function (error) {
     if (error !== null) {
       writeError(error);
     }
   });
-} else {
-  repl();
 }
 

@@ -32,10 +32,11 @@ function writeError(error) {
       error : "Internal error: " + error.message) + "\x1b[0m");
 }
 
-module.exports = function () {
-  var interpreter, rl;
+module.exports = function (interpreter) {
+  var rl;
 
-  interpreter = new hopper.Interpreter();
+  interpreter = interpreter || new hopper.Interpreter();
+  interpreter.enter();
 
   process.stdin.setEncoding("utf8");
   rl = readline.createInterface({
