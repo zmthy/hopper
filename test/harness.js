@@ -39,19 +39,16 @@ function makeLoader(prefix) {
   };
 }
 
-function runTest(file, loader, callback, completion) {
+function runTest(file, loader, callback) {
   file = path.basename(file, ".grace");
-  writeTest(file + " (sync)");
-  async = completion;
-  hopper.load(file, false, loader, function (error) {
+
+  async = function (error) {
+    async = undefined;
     callback(error);
-    writeTest(file + " (async)");
-    hopper.load(file, true, loader, function (error) {
-      async = undefined;
-      callback(error);
-      completion();
-    });
-  });
+  };
+
+  writeTest(file);
+  hopper.load(file, loader, async);
 }
 
 function runTests(dir, callback, completion) {
@@ -74,7 +71,10 @@ function runTests(dir, callback, completion) {
         i += 1;
       } while (path.extname(file) !== ".grace");
 
-      runTest(file, loader, callback, run);
+      runTest(file, loader, function () {
+        callback.apply(this, arguments);
+        run();
+      });
     }
 
     if (error !== null) {
@@ -85,7 +85,7 @@ function runTests(dir, callback, completion) {
 
       loader = makeLoader(dir);
 
-      run(0);
+      run();
     }
   });
 }
@@ -108,8 +108,7 @@ hopper = require("../lib/hopper");
 stdout = process.stdout;
 
 process.on("uncaughtException", function (error) {
-  writeFailure(error);
-  async();
+  async(error);
 });
 
 process.on("exit", function () {
