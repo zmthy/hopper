@@ -5,7 +5,7 @@
 "use strict";
 
 var fname, hopper, interactive, interpreter,
-  loader, options, optparse, path, repl, root, sys;
+  loader, options, optparse, path, repl, root, sys, write;
 
 path = require("path");
 sys = require("sys");
@@ -14,13 +14,10 @@ optparse = require("optparse");
 
 hopper = require("../lib/hopper");
 repl = require("./repl");
-
-function writeError(error) {
-  sys.error("\x1b[0;31;48m" + error + "\x1b[0m");
-}
+write = require("./write");
 
 process.on('uncaughtException', function (error) {
-  writeError(error);
+  write.writeError(error);
 });
 
 fname = null;
@@ -56,16 +53,17 @@ options.on(2, function (file) {
 });
 
 options.on(function (option) {
-  writeError("Option parse error: no such option " + option);
-  process.exit(1);
+  write.writeError("Option parse error: no such option " + option);
+  process.exit(2);
 });
 
 options.parse(process.argv);
 
 if (root === true) {
   if (!fname) {
-    writeError("Option parse error: automatic module root without a module");
-    process.exit(2);
+    write
+      .writeError("Option parse error: automatic module root without a module");
+    process.exit(3);
   }
 
   root = path.dirname(fname);
@@ -95,7 +93,8 @@ if (interactive) {
   if (fname !== null) {
     interpreter.interpret('dialect "' + fname + '"', function (error) {
       if (error !== null) {
-        writeError(error);
+        write.writeError(error);
+        process.exit(1);
       } else {
         repl(interpreter);
       }
@@ -107,7 +106,8 @@ if (interactive) {
   fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
   hopper.load(fname, function (error) {
     if (error !== null) {
-      writeError(error);
+      write.writeError(error);
+      process.exit(1);
     }
   });
 }

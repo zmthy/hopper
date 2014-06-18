@@ -2,38 +2,13 @@
 
 "use strict";
 
-var hopper, readline, rt, sys, unicode;
+var hopper, readline, unicode, write;
 
 readline = require("readline");
-sys = require("sys");
 
 hopper = require("../lib/hopper");
-rt = require("../lib/runtime");
 unicode = require("../lib/unicode");
-
-function writeError(error) {
-  sys.error("\x1b[0;31;48m" + (typeof error === "string" ?
-      error : "Internal error: " + error.message) + "\x1b[0m");
-}
-
-function writeString(value) {
-  sys.puts("\x1b[0;32;48m" + value + "\x1b[0m");
-}
-
-function writeValue(value, callback) {
-  try {
-    if (rt.isGraceObject(value)) {
-      rt.apply(value, value.asString, [[]]).then(function (value) {
-        return rt.apply(value, value.asPrimitiveString, [[]]).then(writeString);
-      }).callback(callback);
-    } else {
-      writeString(value.toString());
-    }
-  } catch (error) {
-    writeError(error);
-    callback();
-  }
-}
+write = require("./write");
 
 module.exports = function (interpreter) {
   var rl;
@@ -53,10 +28,12 @@ module.exports = function (interpreter) {
     if (line.replace(/\s/g, "") !== "") {
       interpreter.interpret(line, function (error, result) {
         if (error !== null) {
-          writeError(error);
+          write.writeError(error).callback(function () {
+            rl.prompt();
+          });
         } else {
-          writeValue(result, function () {
-            return rl.prompt();
+          write.writeValue(result).callback(function () {
+            rl.prompt();
           });
         }
       });
