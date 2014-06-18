@@ -1,0 +1,4 @@
+method name(*param) {}
+
+name
+
