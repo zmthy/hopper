@@ -2,13 +2,13 @@
 
 "use strict";
 
-var hopper, readline, runtime, sys, unicode;
+var hopper, readline, rt, sys, unicode;
 
 readline = require("readline");
 sys = require("sys");
 
 hopper = require("../lib/hopper");
-runtime = require("../lib/runtime");
+rt = require("../lib/runtime");
 unicode = require("../lib/unicode");
 
 function writeError(error) {
@@ -16,11 +16,22 @@ function writeError(error) {
       error : "Internal error: " + error.message) + "\x1b[0m");
 }
 
-function writeValue(value) {
+function writeString(value) {
+  sys.puts("\x1b[0;32;48m" + value + "\x1b[0m");
+}
+
+function writeValue(value, callback) {
   try {
-    sys.puts("\x1b[0;32;48m" + value + "\x1b[0m");
+    if (rt.isGraceObject(value)) {
+      rt.apply(value, value.asString, [[]]).then(function (value) {
+        return rt.apply(value, value.asPrimitiveString, [[]]).then(writeString);
+      }).callback(callback);
+    } else {
+      writeString(value.toString());
+    }
   } catch (error) {
     writeError(error);
+    callback();
   }
 }
 
@@ -44,10 +55,10 @@ module.exports = function (interpreter) {
         if (error !== null) {
           writeError(error);
         } else {
-          writeValue(result);
+          writeValue(result, function () {
+            return rl.prompt();
+          });
         }
-
-        rl.prompt();
       });
     } else {
       rl.prompt();
