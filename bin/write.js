@@ -30,7 +30,7 @@ function writeError(error) {
     });
   }
 
-  writeRed("Internal Error: " + (error.messge || error));
+  writeRed("Internal Error: " + (error.message || error));
   return Task.resolve();
 }
 

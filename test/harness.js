@@ -142,10 +142,10 @@ runTests("run", function (error) {
 
   runTests("fail", function (error) {
     if (error !== null) {
-      if (rt.isGraceExceptionPacket(error)) {
-        writePass();
-      } else {
+      if (rt.isInternalError(error)) {
         writeFailure(error);
+      } else {
+        writePass();
       }
     } else {
       writeFailure("Failed (completed without error)");
