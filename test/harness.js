@@ -8,7 +8,15 @@
 
 "use strict";
 
-var async, exitCode, fail, fs, hopper, pass, path, stdout, summary;
+var async, exitCode, fail, fs, hopper, pass, path, rt, stdout, summary;
+
+fs = require("fs");
+path = require("path");
+
+hopper = require("../lib/hopper");
+rt = require("../lib/runtime");
+
+stdout = process.stdout;
 
 function writeTest(file) {
   stdout.write("Test " + file + ": ");
@@ -101,12 +109,6 @@ function summarise() {
   }
 }
 
-fs = require("fs");
-path = require("path");
-hopper = require("../lib/hopper");
-
-stdout = process.stdout;
-
 process.on("uncaughtException", function (error) {
   async(error);
 });
@@ -128,9 +130,7 @@ pass = 0;
 fail = 0;
 
 runTests("run", function (error) {
-  if (error instanceof Error) {
-    writeFailure(error);
-  } else if (error !== null) {
+  if (error !== null) {
     writeFailure(error);
   } else {
     writePass();
@@ -141,10 +141,12 @@ runTests("run", function (error) {
   fail = 0;
 
   runTests("fail", function (error) {
-    if (error instanceof Error) {
-      writeFailure(error);
-    } else if (error !== null) {
-      writePass();
+    if (error !== null) {
+      if (rt.isGraceExceptionPacket(error)) {
+        writePass();
+      } else {
+        writeFailure(error);
+      }
     } else {
       writeFailure("Failed (completed without error)");
     }

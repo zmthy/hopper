@@ -93,8 +93,9 @@ if (interactive) {
   if (fname !== null) {
     interpreter.interpret('dialect "' + fname + '"', function (error) {
       if (error !== null) {
-        write.writeError(error);
-        process.exit(1);
+        write.writeError(error).then(function () {
+          process.exit(1);
+        });
       } else {
         repl(interpreter);
       }
@@ -106,8 +107,9 @@ if (interactive) {
   fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
   hopper.load(fname, function (error) {
     if (error !== null) {
-      write.writeError(error);
-      process.exit(1);
+      write.writeError(error).then(function () {
+        process.exit(1);
+      });
     }
   });
 }
