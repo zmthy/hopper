@@ -25,6 +25,23 @@ function writeError(error) {
   if (rt.isGraceObject(error)) {
     return toString(error).then(function (string) {
       writeRed(string);
+
+      if (rt.isGraceExceptionPacket(error)) {
+        return Task.each(error.object.stackTrace, function (trace) {
+          var line = "\tat «" + trace.name + "»";
+
+          if (trace.object !== null) {
+            line += " in «" +
+              trace.object.toString().replace(/\n/g, "\n\t") + "»";
+          }
+
+          if (trace.module !== null) {
+            line += ' from "' + trace.module + '"';
+          }
+
+          sys.puts(line);
+        });
+      }
     }).then(null, function () {
       writeRed("Internal Error: Failed to render exception");
     });
@@ -36,7 +53,7 @@ function writeError(error) {
 
 function writeValue(value) {
   if (rt.isGraceObject(value)) {
-    return toString(value).then(writeGreen).then(null, writeError);
+    return toString(value).then(writeGreen, writeError);
   }
 
   writeGreen(value.toString());
