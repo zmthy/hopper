@@ -8,12 +8,13 @@
 
 "use strict";
 
-var async, exitCode, fail, fs, hopper, pass, path, rt, stdout, summary;
+var async, exitCode, fail, fs, hopper, parser, pass, path, rt, stdout, summary;
 
 fs = require("fs");
 path = require("path");
 
 hopper = require("../lib/hopper");
+parser = require("../lib/parser");
 rt = require("../lib/runtime");
 
 stdout = process.stdout;
@@ -129,6 +130,12 @@ summary = [];
 pass = 0;
 fail = 0;
 
+function pushSummary(value) {
+  summary.push(value);
+  pass = 0;
+  fail = 0;
+}
+
 runTests("run", function (error) {
   if (error !== null) {
     writeFailure(error);
@@ -136,13 +143,11 @@ runTests("run", function (error) {
     writePass();
   }
 }, function () {
-  summary.push([pass, fail, "passed as required"]);
-  pass = 0;
-  fail = 0;
+  pushSummary([pass, fail, "passed as required"]);
 
   runTests("fail", function (error) {
     if (error !== null) {
-      if (rt.isInternalError(error)) {
+      if (rt.isInternalError(error) || rt.isParseError(error)) {
         writeFailure(error);
       } else {
         writePass();
@@ -151,8 +156,22 @@ runTests("run", function (error) {
       writeFailure("Failed (completed without error)");
     }
   }, function () {
-    summary.push([pass, fail, "failed as required"]);
-    summarise();
+    pushSummary([pass, fail, "failed as required"]);
+
+    runTests("parse-fail", function (error) {
+      if (error !== null) {
+        if (rt.isParseError(error)) {
+          writePass();
+        } else {
+          writeFailure(error);
+        }
+      } else {
+        writeFailure("Failed (parsed without error)");
+      }
+    }, function () {
+      summary.push([pass, fail, "failed parsing as required"]);
+      summarise();
+    });
   });
 });
 

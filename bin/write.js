@@ -33,7 +33,7 @@ function writeError(error) {
           line = "\tat ";
 
           if (typeof trace === "string") {
-            line += '"' + trace + '"';
+            line += trace;
           } else {
             line += "«" + trace.name + "»";
 
@@ -52,7 +52,7 @@ function writeError(error) {
             }
           }
 
-          sys.puts(line);
+          sys.error(line);
         });
       }
     }).then(null, function () {
