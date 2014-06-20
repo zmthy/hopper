@@ -28,15 +28,28 @@ function writeError(error) {
 
       if (rt.isGraceExceptionPacket(error)) {
         return Task.each(error.object.stackTrace, function (trace) {
-          var line = "\tat «" + trace.name + "»";
+          var line, loc;
 
-          if (trace.object !== null) {
-            line += " in «" +
-              trace.object.toString().replace(/\n/g, "\n\t") + "»";
-          }
+          line = "\tat ";
 
-          if (trace.module !== null) {
-            line += ' from "' + trace.module + '"';
+          if (typeof trace === "string") {
+            line += '"' + trace + '"';
+          } else {
+            line += "«" + trace.name + "»";
+
+            if (trace.object !== null) {
+              line += " in «" +
+                trace.object.toString().replace(/\n/g, "\n\t") + "»";
+            }
+
+            loc = trace.location;
+            if (loc !== null) {
+              if (loc.module !== null) {
+                line += ' from "' + loc.module + '"';
+              }
+
+              line += " (line " + loc.line + ", column " + loc.column + ")";
+            }
           }
 
           sys.puts(line);
