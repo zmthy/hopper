@@ -1,6 +1,6 @@
 method name {
-    return
-    noSuchValue
+  return
+  noSuchValue
 }
 
 name

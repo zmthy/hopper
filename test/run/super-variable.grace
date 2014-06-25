@@ -1,14 +1,14 @@
 class new {
-    def name = object {}
+  def name = object {}
 }
 
 object {
-    inherits new
+  inherits new
 
-    method name {
-        super.name
-    }
+  method name {
+    super.name
+  }
 
-    name
+  name
 }
 

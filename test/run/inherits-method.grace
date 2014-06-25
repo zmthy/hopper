@@ -1,10 +1,10 @@
 class name {
-    method above {}
+  method above {}
 }
 
 object {
-    inherits name
+  inherits name
 
-    self.above
+  self.above
 }
 

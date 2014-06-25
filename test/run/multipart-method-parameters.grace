@@ -1,8 +1,8 @@
 method first(ignore) second(param) {
-    param.name
+  param.name
 }
 
 first(object {}) second(object {
-    method name { self }
+  method name { self }
 }).name
 

@@ -1,4 +1,4 @@
 "hello {
-    object {}
+  object {}
 } world"
 

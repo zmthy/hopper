@@ -1,4 +1,4 @@
 method name {
-    method wrong {}
+  method wrong {}
 }
 

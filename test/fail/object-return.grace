@@ -1,5 +1,5 @@
 method name {
-    object { return }
+  object { return }
 }
 
 name

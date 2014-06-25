@@ -1,9 +1,9 @@
 def name = object {
-    method *(rhs) { self }
+  method *(rhs) { self }
 }
 
 def drop = object {
-    method +(rhs) {}
+  method +(rhs) {}
 }
 
 drop + name * name

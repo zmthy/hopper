@@ -1,5 +1,5 @@
 type {
-    name
-    name
+  name
+  name
 }
 

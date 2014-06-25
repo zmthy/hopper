@@ -1,8 +1,8 @@
 type First = type {
-    name -> Second
+  name -> Second
 }
 
 type Second = type {
-    name -> First
+  name -> First
 }
 

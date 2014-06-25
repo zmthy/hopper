@@ -1,14 +1,14 @@
 class new {
-    method name {}
+  method name {}
 }
 
 object {
-    inherits new
+  inherits new
 
-    method name {
-        super.name
-    }
+  method name {
+    super.name
+  }
 
-    name
+  name
 }
 

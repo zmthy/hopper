@@ -1,12 +1,12 @@
 class new {}
 
 object {
-    inherits new
+  inherits new
 
-    method name {
-        super.name
-    }
+  method name {
+    super.name
+  }
 
-    name
+  name
 }
 

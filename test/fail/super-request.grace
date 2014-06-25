@@ -1,16 +1,16 @@
 class new {
-    method name {
-        fail
-    }
+  method name {
+    fail
+  }
 }
 
 object {
-    inherits new
+  inherits new
 
-    method name {
-        super.name
-    }
+  method name {
+    super.name
+  }
 
-    name
+  name
 }
 

@@ -1,7 +1,7 @@
 method name {
-    object {
-        method check {}
-    }
+  object {
+    method check {}
+  }
 }
 
 name.check

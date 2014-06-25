@@ -1,8 +1,8 @@
 method name(block) { block.apply }
 
 name {
-    self
+  self
 }.name {
-    object {}
+  object {}
 }
 

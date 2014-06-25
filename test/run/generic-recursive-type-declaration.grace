@@ -1,8 +1,8 @@
 type First<T> = type {
-    name -> Second<T>
+  name -> Second<T>
 }
 
 type Second<T> = type {
-    name -> First<T>
+  name -> First<T>
 }
 

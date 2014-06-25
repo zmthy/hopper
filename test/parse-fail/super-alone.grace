@@ -1,8 +1,8 @@
 class name {}
 
 object {
-    inherits name
+  inherits name
 
-    super
+  super
 }
 

@@ -1,6 +1,6 @@
 class name {}
 
 object {
-    inherits name
+  inherits name
 }
 

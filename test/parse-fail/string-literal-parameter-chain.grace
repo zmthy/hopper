@@ -1,5 +1,5 @@
 method name(string) {
-    object {}
+  object {}
 }
 
 name "hello".asString

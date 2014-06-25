@@ -1,8 +1,8 @@
 method name {
-    return object {}
+  return object {}
 }
 
 object {
-    inherits name
+  inherits name
 }
 

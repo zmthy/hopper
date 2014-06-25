@@ -1,4 +1,4 @@
 object {
-    method +(a) *(b) {}
+  method +(a) *(b) {}
 }
 

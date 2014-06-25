@@ -1,10 +1,10 @@
 class name {
-    method check {}
+  method check {}
 }
 
 object {
-    inherits name
+  inherits name
 
-    check
+  check
 }
 

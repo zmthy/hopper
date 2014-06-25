@@ -1,5 +1,5 @@
 method name {
-    { return }
+  { return }
 }
 
 name.apply
