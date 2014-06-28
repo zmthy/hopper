@@ -7,7 +7,7 @@ var hopper, readline, unicode, write;
 readline = require("readline");
 
 hopper = require("../lib/hopper");
-unicode = require("../lib/unicode");
+unicode = require("../lib/parser/unicode");
 write = require("./write");
 
 module.exports = function (interpreter) {
