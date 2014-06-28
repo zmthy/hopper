@@ -69,6 +69,10 @@ function writeValue(value) {
     return toString(value).then(writeGreen, writeError);
   }
 
+  if (value === null || value === undefined) {
+    writeRed("Internal Error: the expression resulted in " + value);
+  }
+
   writeGreen(value.toString());
   return Task.resolve();
 }
