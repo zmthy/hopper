@@ -14,11 +14,11 @@ function toString(value) {
 }
 
 function writeGreen(value) {
-  sys.puts("\x1b[0;32;48m" + value + "\x1b[0m");
+  sys.puts("\x1b[0;32;48m" + value + " \x1b[0m");
 }
 
 function writeRed(value) {
-  sys.error("\x1b[0;31;48m" + value + "\x1b[0m");
+  sys.error("\x1b[0;31;48m" + value + " \x1b[0m");
 }
 
 function writeError(error) {
