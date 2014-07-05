@@ -1,33 +1,37 @@
 { "name": "hopper"
 , "version": "0.0.1-pre"
 , "description": "An interpreter for the Grace programming language"
-, "main": "lib/hopper.js"
-, "bin": "bin/hopper.js"
-, "dependencies":
-  { "setimmediate": "1.x"
-  , "optparse": "1.x"
-  }
-, "scripts":
-  { "test": "test/harness.js"
-  }
-, "repository":
-  { "type": "git"
-  , "url": "git://github.com/zmthy/hopper.git"
-  }
 , "keywords":
   [ "grace"
   , "language"
   , "interpreter"
   ]
+, "dependencies":
+  { "setimmediate": "1.x"
+  , "optparse": "1.x"
+  }
+, "main": "lib/hopper.js"
+, "bin": "bin/hopper.js"
+, "scripts":
+  { "test": "test/harness.js"
+  }
+, "homepage": "https://github.com/zmthy/hopper"
+, "repository":
+  { "type": "git"
+  , "url": "git://github.com/zmthy/hopper.git"
+  }
+, "bugs":
+  { "url": "https://github.com/zmthy/hopper/issues"
+  , "email": "git@zmthy.io"
+  }
 , "author":
   { "name": "Timothy Jones"
   , "email": "tim@zmthy.io"
   , "url": "http://zmthy.io"
   }
-, "license": "MIT"
-, "bugs":
-  { "url": "https://github.com/zmthy/hopper/issues"
-  , "email": "git@zmthy.io"
+, "license":
+  { "type": "GPL-3.0+"
+  , "url": "https://www.gnu.org/licenses/gpl-3.0.html"
   }
 }
 
