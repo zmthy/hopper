@@ -9,7 +9,13 @@ rt = require("../lib/runtime");
 
 function toString(value) {
   return rt.apply(value, value.asString, [[]]).then(function (value) {
-    return rt.apply(value, value.asPrimitiveString, [[]]);
+    return rt.String.assert(value).then(function () {
+      return rt.apply(value, value.asPrimitiveString, [[]]);
+    });
+  }).then(null, function (packet) {
+    // The object can't be stringified, so it can't be added to the trace.
+    packet.object.stackTrace.push(rt.trace("asString", null));
+    throw packet;
   });
 }
 
@@ -28,31 +34,37 @@ function writeError(error) {
 
       if (rt.isGraceExceptionPacket(error)) {
         return Task.each(error.object.stackTrace, function (trace) {
-          var line, loc;
-
-          line = "\tat ";
-
-          if (typeof trace === "string") {
-            line += trace;
-          } else {
-            line += "«" + trace.name + "»";
-
-            if (trace.object !== null) {
-              line += " in «" +
-                trace.object.toString().replace(/\n/g, "\n\t") + "»";
+          return Task.resolve("\tat ").then(function (line) {
+            if (typeof trace === "string") {
+              return line + trace;
             }
 
-            loc = trace.location;
-            if (loc !== null) {
-              if (loc.module !== null) {
-                line += ' from "' + loc.module + '"';
-              }
+            return Task.resolve(line + "«" + trace.name + "»")
+              .then(function (line) {
+                if (trace.object !== null) {
+                  return toString(trace.object).then(function (string) {
+                    return line + " in «" +
+                      string.replace(/\n/g, "\n\t") + "»";
+                  });
+                }
 
-              line += " (line " + loc.line + ", column " + loc.column + ")";
-            }
-          }
+                return line;
+              }).then(function (line) {
+                var loc = trace.location;
 
-          sys.error(line);
+                if (loc !== null) {
+                  if (loc.module !== null) {
+                    line += ' from "' + loc.module + '"';
+                  }
+
+                  line += " (line " + loc.line + ", column " + loc.column + ")";
+                }
+
+                return line;
+              });
+          }).then(function (line) {
+            sys.error(line);
+          });
         });
       }
     }).then(null, function () {
@@ -71,9 +83,10 @@ function writeValue(value) {
 
   if (value === null || value === undefined) {
     writeRed("Internal Error: the expression resulted in " + value);
+  } else {
+    writeGreen(value.toString());
   }
 
-  writeGreen(value.toString());
   return Task.resolve();
 }
 

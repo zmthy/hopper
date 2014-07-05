@@ -7,7 +7,8 @@
   , "interpreter"
   ]
 , "dependencies":
-  { "setimmediate": "1.x"
+  { "asap": "1.x"
+  , "setimmediate": "1.x"
   , "optparse": "1.x"
   }
 , "main": "lib/hopper.js"

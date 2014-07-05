@@ -81,7 +81,12 @@ function runTests(dir, callback, completion) {
       } while (path.extname(file) !== ".grace");
 
       runTest(file, loader, function () {
-        callback.apply(this, arguments);
+        try {
+          callback.apply(this, arguments);
+        } catch (error) {
+          writeError(error);
+        }
+
         run();
       });
     }
