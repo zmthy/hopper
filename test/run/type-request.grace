@@ -1,0 +1,2 @@
+type { name }.match(object {})
+
