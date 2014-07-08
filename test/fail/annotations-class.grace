@@ -1,2 +1,2 @@
-class name is ann {}
+class name.new is ann {}
 

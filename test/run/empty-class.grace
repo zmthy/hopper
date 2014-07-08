@@ -1,2 +1,2 @@
-class name {}
+class name.new {}
 

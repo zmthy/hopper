@@ -1,4 +1,4 @@
-class name { return }
+class name.new { return }
 
-name
+name.new
 

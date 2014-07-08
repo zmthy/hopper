@@ -1,0 +1,4 @@
+constructor name { return }
+
+name
+

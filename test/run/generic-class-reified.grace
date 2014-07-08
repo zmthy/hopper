@@ -1,4 +1,4 @@
-class name<T> { T }
+class name.new<T> { T }
 
-name<type {}>
+name.new<type {}>
 

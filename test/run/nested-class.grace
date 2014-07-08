@@ -1,9 +1,9 @@
-class first {
-  class second {
+class first.new {
+  class second.new {
     method third {}
   }
 }
 
-first.second.third
-first.second.third
+first.new.second.new.third
+first.new.second.new.third
 

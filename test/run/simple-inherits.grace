@@ -1,4 +1,4 @@
-class name {}
+constructor name {}
 
 object {
   inherits name

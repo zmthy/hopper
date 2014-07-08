@@ -1,4 +1,4 @@
-class new {
+constructor new {
   method first {}
   method second {}
 }

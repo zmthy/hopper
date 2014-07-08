@@ -1,0 +1,2 @@
+constructor name<T> {}
+

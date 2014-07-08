@@ -1,2 +1,2 @@
-class name<T> {}
+class name.new<T> {}
 
