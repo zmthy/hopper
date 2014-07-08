@@ -1,0 +1,4 @@
+dialect "empty"
+
+method name {}
+
