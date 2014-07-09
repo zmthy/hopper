@@ -8,6 +8,10 @@ Task = require("../lib/task");
 rt = require("../lib/runtime");
 
 function toString(value) {
+  if (!rt.isGraceObject(value)) {
+    return Task.resolve(value.toString());
+  }
+
   return rt.apply(value, value.asString, [[]]).then(function (value) {
     return rt.String.assert(value).then(function () {
       return rt.apply(value, value.asPrimitiveString, [[]]);
