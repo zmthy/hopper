@@ -1,6 +1,8 @@
 type Name<T> = {}
 
-method ann {}
+constructor ann {
+  method annotateMethod(value) {}
+}
 
 method name -> Name<Name> is ann {}
 
