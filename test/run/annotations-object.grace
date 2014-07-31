@@ -1,6 +1,6 @@
-constructor ann {
+constructor annotation {
   method annotateObject(value) {}
 }
 
-object is ann {}
+object is annotation {}
 

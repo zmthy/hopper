@@ -1,6 +1,2 @@
-constructor ann {
-  method annotateMethod(value) {}
-}
-
-constructor name is ann {}
+constructor name is confidential {}
 

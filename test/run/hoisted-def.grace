@@ -4,5 +4,5 @@ try {
 
     type Name = name
   }
-} catch { error : UndefinedValue -> error}
+} catch { error : IncompleteObject -> error}
 

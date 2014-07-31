@@ -1,6 +1,2 @@
-constructor ann {
-  method annotateType(value) {}
-}
-
-{ type Name is ann = type {} }.apply
+{ type Name is confidential = type {} }.apply
 
