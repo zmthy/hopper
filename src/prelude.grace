@@ -64,7 +64,7 @@ def MatchFailure = object {
   inherits Exception.refine("Match Failure")
 
   method raiseForObject(value) {
-    self.raiseMessage "Failed to match against object {value}"
+    self.raise "Failed to match against object {value}"
   }
 }
 

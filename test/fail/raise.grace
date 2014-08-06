@@ -1,2 +1,2 @@
-Exception.raise
+Exception.raiseDefault
 

@@ -1,5 +1,5 @@
 try {
-  Exception.raise
+  Exception.raiseDefault
 } catch { e ->
   e
 }
