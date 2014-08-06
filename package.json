@@ -8,8 +8,9 @@
   ]
 , "dependencies":
   { "asap": "1.x"
-  , "setimmediate": "1.x"
+  , "brfs": "1.x"
   , "optparse": "1.x"
+  , "setimmediate": "1.x"
   }
 , "main": "lib/hopper.js"
 , "bin": "bin/hopper.js"
@@ -33,6 +34,9 @@
 , "license":
   { "type": "GPL-3.0+"
   , "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+  }
+, "browserify":
+  { "transform": [ "brfs" ]
   }
 }
 
