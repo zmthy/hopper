@@ -1,7 +1,5 @@
 constructor new {
-  def name = object {}
-
-  name
+  method name {}
 }
 
 object {

@@ -5,6 +5,6 @@ constructor above {
 object {
   inherits above
 
-  def name is public = object {}
+  method name is confidential {}
 }
 
