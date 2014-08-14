@@ -38,36 +38,35 @@ function writeError(error) {
 
       if (rt.isGraceExceptionPacket(error)) {
         return Task.each(error.object.stackTrace, function (trace) {
-          return Task.resolve("\tat ").then(function (line) {
-            if (typeof trace === "string") {
-              return line + trace;
+          return Task.resolve("\t").then(function (line) {
+            if (trace.name !== null) {
+              return line + "at «" + trace.name + "» ";
             }
 
-            return Task.resolve(line + "«" + trace.name + "»")
-              .then(function (line) {
-                if (trace.object !== null) {
-                  return toString(trace.object).then(function (string) {
-                    return line + " in «" +
-                      string.replace(/\n/g, "\n\t") + "»";
-                  });
-                }
-
-                return line;
-              }).then(function (line) {
-                var loc = trace.location;
-
-                if (loc !== null) {
-                  if (loc.module !== null) {
-                    line += ' from "' + loc.module + '"';
-                  }
-
-                  line += " (line " + loc.line + ", column " + loc.column + ")";
-                }
-
-                return line;
-              });
+            return line;
           }).then(function (line) {
-            sys.error(line);
+            if (trace.object !== null) {
+              return toString(trace.object).then(function (string) {
+                return line + "in «" +
+                  string.replace(/\n/g, "\n\t") + "» ";
+              });
+            }
+
+            return line;
+          }).then(function (line) {
+            var loc = trace.location;
+
+            if (loc !== null) {
+              if (loc.module !== null) {
+                line += 'from "' + loc.module + '" ';
+              }
+
+              line += "(line " + loc.line + ", column " + loc.column + ")";
+            }
+
+            return line;
+          }).then(function (line) {
+            sys.error(line.replace(/\s+$/g, ""));
           });
         });
       }
