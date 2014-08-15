@@ -1,8 +1,14 @@
-method this {
-  self
-}
+method name {}
 
 object {
-  outer.this.this
+  method name {
+    Exception.raiseDefault
+  }
+
+  method test {
+    outer.name
+  }
+
+  test
 }
 

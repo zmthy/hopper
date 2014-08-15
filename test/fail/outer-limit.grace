@@ -1,2 +1,2 @@
-outer.outer
+outer.noSuchMethod
 

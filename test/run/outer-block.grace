@@ -1,6 +1,10 @@
 method name {}
 
 object {
- { outer.name }.apply
+  method name {
+    Exception.raiseDefault
+  }
+
+  { outer.name }.apply
 }
 
