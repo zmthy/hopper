@@ -60,10 +60,6 @@ method until(cond : Action<Boolean>) do(action : Action) -> Done {
   while { !cond.apply } do(action)
 }
 
-type Do<T> = {
-  do(f : Function<T, Object>) -> Done
-}
-
 method for<T>(doable : Do<T>) do(f : Function<T, Object>) -> Done {
   doable.do(f)
 }

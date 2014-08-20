@@ -1,0 +1,2 @@
+sequence.empty.asPrimitiveArray.size
+

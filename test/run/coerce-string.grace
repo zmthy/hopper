@@ -1,0 +1,2 @@
+"abc".asPrimitiveString ++ "def"
+

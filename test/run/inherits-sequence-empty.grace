@@ -1,0 +1,4 @@
+object {
+  inherits sequence.empty
+}
+
