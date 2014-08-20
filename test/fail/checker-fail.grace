@@ -1,0 +1,2 @@
+dialect "../run/checker-fail"
+
