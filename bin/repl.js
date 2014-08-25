@@ -2,7 +2,7 @@
 
 "use strict";
 
-var hopper, readline, unicode, write;
+var hopper, readline, rt, unicode, write;
 
 readline = require("readline");
 
@@ -10,11 +10,21 @@ hopper = require("../lib/hopper");
 unicode = require("../lib/parser/unicode");
 write = require("./write");
 
+rt = hopper.runtime;
+
 module.exports = function (interpreter) {
   var rl;
 
   interpreter = interpreter || new hopper.Interpreter();
-  interpreter.enter();
+  interpreter.enter(function (error, result) {
+    if (error !== null) {
+      write.writeError(error);
+    } else {
+      result.asString = hopper.runtime.method("asString", 0, function () {
+        return rt.string("repl");
+      });
+    }
+  });
 
   process.stdin.setEncoding("utf8");
   rl = readline.createInterface({
@@ -26,7 +36,7 @@ module.exports = function (interpreter) {
 
   rl.on("line", function (line) {
     if (line.replace(/\s/g, "") !== "") {
-      interpreter.interpret(line, function (error, result) {
+      interpreter.interpret("repl", line, function (error, result) {
         if (error !== null) {
           write.writeError(error).callback(function () {
             rl.prompt();
