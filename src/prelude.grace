@@ -21,8 +21,8 @@ method until(cond : Action<Boolean>) do(action : Action) -> Done {
   while { !cond.apply } do(action)
 }
 
-method for<T>(doable : Do<T>) do(f : Event<T>) -> Done {
-  doable.do(f)
+method for<T>(in : Do<T>) do(f : Procedure<T>) -> Done {
+  in.do(f)
 }
 
 type ExceptionPattern = {
