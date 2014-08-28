@@ -25,3 +25,27 @@ method for<T>(doable : Do<T>) do(f : Event<T>) -> Done {
   doable.do(f)
 }
 
+type ExceptionPattern = {
+  parent -> ExceptionPattern
+
+  refine(name : String) -> ExceptionPattern
+  refine(name : String) defaultMessage(message : String) -> ExceptionPattern
+
+  raise(message : String) -> Nothing
+  raiseDefault -> Nothing
+}
+
+def EnvironmentException : ExceptionPattern =
+  Exception.refine("Environment Exception")
+
+def ResourceException : ExceptionPattern =
+  Exception.refine("Resource Exception")
+
+def SubobjectResponsibility : ExceptionPattern = object {
+  inherits LogicError.refine("Subobject Responsibility")
+
+  method raiseForMethod(name : String) -> Nothing {
+    raise "A subobject should have overridden the method «{name}»"
+  }
+}
+
