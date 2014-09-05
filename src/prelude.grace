@@ -49,3 +49,72 @@ def SubobjectResponsibility : ExceptionPattern = object {
   }
 }
 
+type List<T> = Sequence<T> & type {
+  // Insert an element at the given index, overwriting and returning the element
+  // at that position.
+  // Raises an Out Of Bounds if the index is not within the bounds of the list.
+  at(index : Number) put(element : T) -> T
+
+  // Add an element to the end of the list.
+  add(element : T) -> Done
+
+  // Remove the given element, returning the index where it was found.
+  // Returns the result of the given action if the element is not present.
+  remove(element : T) ifAbsent<U>(action : Action<U>) -> Number | U
+
+  // Remove the given element, returning the index where it was found.
+  // Raises a Failed Search if the element is not present.
+  remove(element : T) -> Number
+}
+
+def list = object {
+  inherits delegateTo(sequence)
+
+  constructor withAll<T>(elements : Sequence<T>) -> List<T> {
+    inherits sequence.withAll<T>(elements)
+
+    method at(index : Number) put(element : T) -> T {
+      if ((index < 1) || (index > size)) then {
+        OutOfBounds.raiseForIndex(index)
+      }
+
+      internalSplice(index - 1, 1, element)
+    }
+
+    method add(element : T) -> Done {
+      internalPush(element)
+    }
+
+    method remove(element : T) ifAbsent<U>(action : Action<U>) -> Number | U {
+      for (indices) do { i ->
+        if (at(i) == element) then {
+          internalSplice(i - 1, 1)
+          return i
+        }
+      }
+
+      action.apply
+    }
+
+    method remove(element : T) -> Number {
+      remove(element) ifAbsent<None> {
+        FailedSearch.raiseForObject(element)
+      }
+    }
+
+    method asString -> String {
+      if (size == 0) then {
+        "[]"
+      } else {
+        "[{sliceFrom(2).fold { s, e ->
+          "{s}, {e.asString}"
+        } startingWith(at(1).asString)}]"
+      }
+    }
+  }
+
+  method asString -> String {
+    "list"
+  }
+}
+
