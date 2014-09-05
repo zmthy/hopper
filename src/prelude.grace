@@ -31,8 +31,8 @@ type ExceptionPattern = {
   refine(name : String) -> ExceptionPattern
   refine(name : String) defaultMessage(message : String) -> ExceptionPattern
 
-  raise(message : String) -> Nothing
-  raiseDefault -> Nothing
+  raise(message : String) -> None
+  raiseDefault -> None
 }
 
 def EnvironmentException : ExceptionPattern =
@@ -44,7 +44,7 @@ def ResourceException : ExceptionPattern =
 def SubobjectResponsibility : ExceptionPattern = object {
   inherits LogicError.refine("Subobject Responsibility")
 
-  method raiseForMethod(name : String) -> Nothing {
+  method raiseForMethod(name : String) -> None {
     raise "A subobject should have overridden the method «{name}»"
   }
 }
