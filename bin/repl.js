@@ -2,12 +2,11 @@
 
 "use strict";
 
-var hopper, readline, rt, unicode, write;
+var hopper, readline, rt, write;
 
 readline = require("readline");
 
 hopper = require("../lib/hopper");
-unicode = require("../lib/parser/unicode");
 write = require("./write");
 
 rt = hopper.runtime;

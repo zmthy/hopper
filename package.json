@@ -7,15 +7,19 @@
   , "interpreter"
   ]
 , "dependencies":
-  { "asap": "1.x"
-  , "brfs": "1.x"
+  { "asap": ">=1.0 <3.0"
   , "optparse": "1.x"
   , "setimmediate": "1.x"
+  }
+, "devDependencies":
+  { "brfs": "1.x"
+  , "unicode-7.0.0": "0.1.x"
   }
 , "main": "lib/hopper.js"
 , "bin": "bin/hopper.js"
 , "scripts":
   { "test": "test/harness.js"
+  , "prepublish": "tools/build-unicode.js"
   }
 , "homepage": "https://github.com/zmthy/hopper"
 , "repository":
