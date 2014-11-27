@@ -12,9 +12,9 @@ function toString(value) {
     return Task.resolve(value.toString());
   }
 
-  return rt.apply(value, value.asString, [[]]).then(function (value) {
+  return rt.apply(value, value.asString, [ [] ]).then(function (value) {
     return rt.String.assert(value).then(function () {
-      return rt.apply(value, value.asPrimitiveString, [[]]);
+      return rt.apply(value, value.asPrimitiveString, [ [] ]);
     });
   }).then(null, function (packet) {
     // The object can't be stringified, so it can't be added to the trace.
@@ -95,4 +95,3 @@ function writeValue(value) {
 
 exports.writeError = writeError;
 exports.writeValue = writeValue;
-

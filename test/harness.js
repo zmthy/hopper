@@ -8,13 +8,12 @@
 
 "use strict";
 
-var async, exitCode, fail, fs, hopper, parser, pass, path, rt, stdout, summary;
+var async, fail, fs, hopper, pass, path, rt, stdout, summary;
 
 fs = require("fs");
 path = require("path");
 
 hopper = require("../lib/hopper");
-parser = require("../lib/parser");
 rt = require("../lib/runtime");
 
 stdout = process.stdout;
@@ -83,8 +82,8 @@ function runTests(dir, callback, completion) {
       runTest(file, loader, function () {
         try {
           callback.apply(this, arguments);
-        } catch (error) {
-          writeError(error);
+        } catch (reason) {
+          writeError(reason);
         }
 
         run();
@@ -148,7 +147,7 @@ runTests("run", function (error) {
     writePass();
   }
 }, function () {
-  pushSummary([pass, fail, "passed as required"]);
+  pushSummary([ pass, fail, "passed as required" ]);
 
   runTests("fail", function (error) {
     if (error !== null) {
@@ -161,7 +160,7 @@ runTests("run", function (error) {
       writeFailure("Failed (completed without error)");
     }
   }, function () {
-    pushSummary([pass, fail, "failed as required"]);
+    pushSummary([ pass, fail, "failed as required" ]);
 
     runTests("parse-fail", function (error) {
       if (error !== null) {
@@ -174,9 +173,8 @@ runTests("run", function (error) {
         writeFailure("Failed (parsed without error)");
       }
     }, function () {
-      summary.push([pass, fail, "failed parsing as required"]);
+      summary.push([ pass, fail, "failed parsing as required" ]);
       summarise();
     });
   });
 });
-

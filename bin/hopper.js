@@ -16,7 +16,7 @@ hopper = require("../lib/hopper");
 repl = require("./repl");
 write = require("./write");
 
-process.on('uncaughtException', function (error) {
+process.on("uncaughtException", function (error) {
   write.writeError(error);
 });
 
@@ -25,10 +25,10 @@ interactive = false;
 root = null;
 
 options = new optparse.OptionParser([
-  ["-h", "--help", "Display this help text"],
-  ["-i", "--interactive", "Run in interactive mode"],
-  ["-r", "--root DIR", "Set the root of the module hierarchy"],
-  ["-a", "--auto-root", "Use the main module as the root"]
+  [ "-h", "--help", "Display this help text" ],
+  [ "-i", "--interactive", "Run in interactive mode" ],
+  [ "-r", "--root DIR", "Set the root of the module hierarchy" ],
+  [ "-a", "--auto-root", "Use the main module as the root" ]
 ]);
 
 options.on("help", function () {
@@ -113,4 +113,3 @@ if (interactive) {
     }
   });
 }
-

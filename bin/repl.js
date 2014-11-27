@@ -28,7 +28,7 @@ module.exports = function (interpreter) {
   process.stdin.setEncoding("utf8");
   rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout,
+    output: process.stdout
   });
 
   rl.setPrompt("> ", 2);
@@ -57,4 +57,3 @@ module.exports = function (interpreter) {
     rl.close();
   };
 };
-
