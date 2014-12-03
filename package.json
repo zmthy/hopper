@@ -1,5 +1,5 @@
 { "name": "hopper"
-, "version": "0.0.1-pre"
+, "version": "0.1.0"
 , "description": "An interpreter for the Grace programming language"
 , "keywords":
   [ "grace"
