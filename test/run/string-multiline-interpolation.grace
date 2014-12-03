@@ -1,4 +1,3 @@
 "hello {
   object {}
 } world"
-

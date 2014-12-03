@@ -1,4 +1,3 @@
 object {
   method +(a) *(b) {}
 }
-

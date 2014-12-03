@@ -4,4 +4,3 @@ method name {
 }
 
 name
-

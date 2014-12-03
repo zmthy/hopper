@@ -6,4 +6,3 @@ def cmp = object {
 }
 
 name(cmp < cmp, cmp > (cmp))
-

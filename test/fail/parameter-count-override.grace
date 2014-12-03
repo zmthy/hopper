@@ -7,4 +7,3 @@ object {
 
   method name(first, second) {}
 }
-

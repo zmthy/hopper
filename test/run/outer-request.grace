@@ -7,4 +7,3 @@ object {
 
   outer.name
 }
-

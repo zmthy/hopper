@@ -5,4 +5,3 @@ name {
 }.name {
   object {}
 }
-

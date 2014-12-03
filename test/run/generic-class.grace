@@ -1,2 +1,1 @@
 class name.new<T> {}
-

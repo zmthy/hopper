@@ -5,4 +5,3 @@ class b.new(a) {
 }
 
 b.new(object {})
-

@@ -2,4 +2,3 @@ type {
   name
   name
 }
-

@@ -1,2 +1,1 @@
 type Name<T> = T
-

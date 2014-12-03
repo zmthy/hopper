@@ -2,4 +2,3 @@ type {
   first
   second
 }
-

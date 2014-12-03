@@ -5,4 +5,3 @@ try {
     type Name = name
   }
 } catch { error : IncompleteObject -> error}
-

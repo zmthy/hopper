@@ -7,4 +7,3 @@ object {
 
   method Name {}
 }
-

@@ -3,4 +3,3 @@ def name = object {
 }
 
 name ! object {} ! name
-

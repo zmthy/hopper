@@ -1,2 +1,1 @@
 { name -> name }.apply(object {})
-

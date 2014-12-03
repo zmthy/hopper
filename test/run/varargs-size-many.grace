@@ -3,4 +3,3 @@ method name(first, *params, second) {
 }
 
 name(object {}, object {}, object {}, object {})
-

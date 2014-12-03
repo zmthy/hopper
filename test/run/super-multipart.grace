@@ -11,4 +11,3 @@ object {
 
   first(object {}) second(object {})
 }
-

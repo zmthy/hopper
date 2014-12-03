@@ -1,4 +1,3 @@
 dialect "empty"
 
 method name {}
-

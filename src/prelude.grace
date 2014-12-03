@@ -117,4 +117,3 @@ def list = object {
     "list"
   }
 }
-

@@ -7,4 +7,3 @@ object {
 
   super.name
 }
-

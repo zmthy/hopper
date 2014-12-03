@@ -7,4 +7,3 @@ def drop = object {
 }
 
 drop + name * name
-

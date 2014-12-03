@@ -3,4 +3,3 @@ method name(number) {
 }
 
 name 1.asString
-

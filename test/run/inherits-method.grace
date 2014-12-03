@@ -7,4 +7,3 @@ object {
 
   self.above
 }
-

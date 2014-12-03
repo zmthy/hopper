@@ -3,4 +3,3 @@ type {
 }.assert(object {
   method name(first, rest) {}
 })
-

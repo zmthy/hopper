@@ -1,2 +1,1 @@
 "hello {object {}} world"
-

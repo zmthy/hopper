@@ -7,4 +7,3 @@ method name {
 }
 
 name.inner.apply
-

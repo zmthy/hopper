@@ -5,4 +5,3 @@ method name {
 }
 
 name.check
-

@@ -6,4 +6,3 @@ class first.new {
 
 first.new.second.new.third
 first.new.second.new.third
-

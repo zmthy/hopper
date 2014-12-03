@@ -5,4 +5,3 @@ method first(ignore) second(param) {
 first(object {}) second(object {
   method name { self }
 }).name
-

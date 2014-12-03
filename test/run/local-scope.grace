@@ -6,4 +6,3 @@ object {
     name
   }.apply
 }
-

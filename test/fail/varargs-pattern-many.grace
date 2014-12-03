@@ -5,4 +5,3 @@ name(object {
 }, object {}, object {
   method no {}
 })
-

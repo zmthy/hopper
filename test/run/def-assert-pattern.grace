@@ -1,2 +1,1 @@
 def name : type {} = object {}
-

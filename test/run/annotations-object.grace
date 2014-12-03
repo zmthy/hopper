@@ -3,4 +3,3 @@ constructor annotation {
 }
 
 object is annotation {}
-

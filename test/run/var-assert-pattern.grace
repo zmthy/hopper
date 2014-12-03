@@ -1,2 +1,1 @@
 var name : type {} := object {}
-

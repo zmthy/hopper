@@ -1,3 +1,2 @@
 object { method name {} }
   .name
-

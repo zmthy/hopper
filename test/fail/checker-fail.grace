@@ -1,2 +1,1 @@
 dialect "../run/checker-fail"
-

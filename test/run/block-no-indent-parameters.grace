@@ -2,4 +2,3 @@
 name ->
 object {}
 }
-

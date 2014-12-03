@@ -23,4 +23,3 @@ object {
     Exception.raiseDefault
   }
 }
-

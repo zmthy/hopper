@@ -7,4 +7,3 @@ object {
 
   def name = object {}
 }
-

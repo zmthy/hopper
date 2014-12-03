@@ -7,4 +7,3 @@ object {
 
   var name := object {}
 }
-

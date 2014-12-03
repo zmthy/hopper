@@ -1,4 +1,3 @@
 ("abc" == "abc").orElse {
   fail
 }
-

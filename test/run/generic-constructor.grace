@@ -1,2 +1,1 @@
 constructor name<T> {}
-

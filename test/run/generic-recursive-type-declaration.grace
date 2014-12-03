@@ -5,4 +5,3 @@ type First<T> = type {
 type Second<T> = type {
   name -> First<T>
 }
-

@@ -3,4 +3,3 @@ method name(string) {
 }
 
 name "hello".asString
-

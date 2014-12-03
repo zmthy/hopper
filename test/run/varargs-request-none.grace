@@ -1,4 +1,3 @@
 method name(*param) {}
 
 name
-

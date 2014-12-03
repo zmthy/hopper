@@ -19,4 +19,3 @@ object {
     Exception.raiseDefault
   }
 }
-

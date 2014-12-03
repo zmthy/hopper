@@ -1,4 +1,3 @@
 object {
   def asString = "object"
 }
-
