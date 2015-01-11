@@ -117,3 +117,13 @@ def list = object {
     "list"
   }
 }
+
+def … : Unknown = object {
+  method … {
+    self
+  }
+
+  method asString -> String {
+    "…"
+  }
+}
