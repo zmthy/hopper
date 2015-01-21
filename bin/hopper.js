@@ -74,8 +74,8 @@ if (root !== null) {
     fname = path.relative(root, fname);
   }
 
-  loader = function (interpreter, file, callback) {
-    hopper.defaultLoader(interpreter, path.join(root, file), callback);
+  loader = function (terp, file, callback) {
+    hopper.defaultLoader(terp, path.join(root, file), callback);
   };
 } else {
   loader = hopper.defaultLoader;
