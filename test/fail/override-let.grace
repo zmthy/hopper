@@ -1,5 +1,5 @@
 constructor name {
-  type Name = type {}
+  let Name = type {}
 }
 
 object {

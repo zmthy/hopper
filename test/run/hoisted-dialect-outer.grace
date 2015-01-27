@@ -1,3 +1,3 @@
 dialect "simple-type-declaration"
 
-type Other = outer.Name
+let Other = outer.Name

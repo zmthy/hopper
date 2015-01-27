@@ -1,3 +1,3 @@
 let Name = type {}
 
-Name(object {})
+let Use<E> = Name

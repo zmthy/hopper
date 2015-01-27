@@ -1,3 +1,3 @@
-type Name = type {}
+let Name = type {}
 
 method name -> Name {}

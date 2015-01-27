@@ -1,1 +1,1 @@
-type Name = type {}
+let Name = type {}

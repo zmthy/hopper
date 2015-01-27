@@ -5,12 +5,12 @@ dialect "checker"
 inherits delegateTo(standardPrelude)
 
 // Type errors.
-def TypeError is public = CheckerFailure.refine "Type Error"
+let TypeError is public = CheckerFailure.refine "Type Error"
 
-def RequestError = TypeError.refine "Request Error"
-def DeclarationError = TypeError.refine "Declaration Error"
-def ObjectError = TypeError.refine "Object Error"
-def MethodError = TypeError.refine "Method Error"
+let RequestError = TypeError.refine "Request Error"
+let DeclarationError = TypeError.refine "Declaration Error"
+let ObjectError = TypeError.refine "Object Error"
+let MethodError = TypeError.refine "Method Error"
 
 // Helper method for iterating over two lists at once.
 method for<T>(a : List<T>) and<U>(b : List<U>)
@@ -42,7 +42,7 @@ constructor typeChecker {
   inherits checker
 
   // Type declarations.
-  rule { decl : TypeDeclaration ->
+  rule { decl : Let ->
     def name = decl.name.value
 
     scope.at(name)
@@ -389,7 +389,7 @@ constructor typeChecker {
 
   // Defines the object declarations from representing structural types.
 
-  type Parameter = {
+  let Parameter = type {
     name -> String
     pattern -> ObjectType
   }
@@ -417,7 +417,7 @@ constructor typeChecker {
   }
 
   // Method part type.
-  type Part = {
+  let Part = type {
     name -> String
     parameters -> List<Param>
   }
@@ -428,10 +428,10 @@ constructor typeChecker {
     def parameters : List<Parameter> is public = parameters'
   }
 
-  type Signature = List<Part>
+  let Signature = List<Part>
 
   // Method signature information.
-  type MethodType = {
+  let MethodType = type {
     name -> String
     signature -> Signature
     returnType -> ObjectType
@@ -444,7 +444,7 @@ constructor typeChecker {
 
   // Types stored as method types. The return type of the object is expected to
   // be the pattern type, and the value method is the actual underlying pattern.
-  type TypeDecl = MethodType & type {
+  let TypeDecl = MethodType & type {
     value -> ObjectType
   }
 
@@ -602,7 +602,7 @@ constructor typeChecker {
     }
   }
 
-  type Annotated = { annotations -> List<Expression> }
+  let Annotated = type { annotations -> List<Expression> }
 
   method setPublicityOf(mType : MethodType)
       fromNode(decl : Annotated) -> MethodType {
@@ -632,7 +632,7 @@ constructor typeChecker {
     !(Def.match(decl) || Var.match(decl))
   }
 
-  type ObjectType = {
+  let ObjectType = type {
     methods -> Set<MethodType>
     methodNamed(name : String)
       ifAbsent<T>(onAbsent : Action<T>) -> MethodType | T
@@ -812,7 +812,7 @@ constructor typeChecker {
 
     def pattern : ObjectType is public = unknown
 
-    type Patterned = {
+    let Patterned = type {
       patternOrIfAbsent<T>(onAbsent : Procedure<T>) -> ObjectType | T
     }
 

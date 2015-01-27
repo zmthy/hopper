@@ -1,7 +1,7 @@
-type First<T> = type {
+let First<T> = type {
   name -> Second<T>
 }
 
-type Second<T> = type {
+let Second<T> = type {
   name -> First<T>
 }

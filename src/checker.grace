@@ -41,7 +41,7 @@ inherits delegateTo(prelude, Node)
 // A rule is a partial procedure which accepts at least a Node and may raise a
 // Checker Failure. A rule may return an arbitrary object, which will be
 // interpreted as the static type representation of an object.
-type Rule = Function<Node, Object>
+let Rule = Function<Node, Object>
 
 constructor checker {
 

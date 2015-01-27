@@ -1,2 +1,2 @@
-type B = A.match(object {}).andAlso { type {} }
-type A = {}
+let B = A.match(object {}).andAlso { type {} }
+let A = type {}

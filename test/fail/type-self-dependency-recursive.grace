@@ -1,2 +1,2 @@
-type A = B
-type B = a
+let A = B
+let B = a

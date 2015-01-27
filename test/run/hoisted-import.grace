@@ -1,3 +1,3 @@
 import "simple-type-declaration" as name
 
-type Name = name.Name
+let Name = name.Name

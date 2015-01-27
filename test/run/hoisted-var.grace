@@ -2,6 +2,6 @@ try {
   object {
     var name
 
-    type Name = name
+    let Name = name
   }
 } catch { error : IncompleteObject -> error}

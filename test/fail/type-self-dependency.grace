@@ -1,1 +1,1 @@
-type A = A
+let A = A

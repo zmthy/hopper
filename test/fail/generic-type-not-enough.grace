@@ -1,3 +1,3 @@
-type Name<T, U> = U
+let Name<T, U> = U
 
 Name<type {}>

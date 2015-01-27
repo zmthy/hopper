@@ -1,7 +1,7 @@
-type First = type {
+let First = type {
   name -> Second
 }
 
-type Second = type {
+let Second = type {
   name -> First
 }

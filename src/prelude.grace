@@ -27,7 +27,7 @@ method for<T>(in : Do<T>) do(f : Procedure<T>) -> Done {
   in.do(f)
 }
 
-type ExceptionPattern = {
+let ExceptionPattern = type {
   parent -> ExceptionPattern
 
   refine(name : String) -> ExceptionPattern
@@ -51,7 +51,7 @@ def SubobjectResponsibility : ExceptionPattern is public = object {
   }
 }
 
-type MutableList<T> = List<T> & type {
+let MutableList<T> = List<T> & type {
   // Insert an element at the given index, overwriting and returning the element
   // at that position.
   // Raises an Out Of Bounds if the index is not within the bounds of the list.
@@ -119,8 +119,7 @@ def mutableList is public = object {
   }
 }
 
-
-type Set<T> = Collection<T> & type {
+let Set<T> = Collection<T> & type {
   // Produce the concatenation of this set with another, without modifying
   // either set.
   ++(set : Set<T>) -> Set<T>
@@ -129,7 +128,7 @@ type Set<T> = Collection<T> & type {
   asImmutable -> Set<T>
 }
 
-type MutableSet<T> = Set<T> & type {
+let MutableSet<T> = Set<T> & type {
   // Add an element to the set.
   add(element : T) -> Done
 
@@ -192,7 +191,7 @@ class entry.key<K>(key' : K) value<V>(value' : V) -> Entry<K, V> {
   }
 }
 
-type Dictionary<K, V> = Set<Entry<K, V>> & type {
+let Dictionary<K, V> = Set<Entry<K, V>> & type {
   // Whether the dictionary contains the given key.
   containsKey(key : K) -> Boolean
 
@@ -204,7 +203,7 @@ type Dictionary<K, V> = Set<Entry<K, V>> & type {
   asImmutable -> Dictionary<K, V>
 }
 
-type MutableDictionary<K, V> = Dictionary<K, V> & type {
+let MutableDictionary<K, V> = Dictionary<K, V> & type {
   // Add a value at the given key into the dictionary.
   // Replaces the existing entry if the key is already present.
   at(key : K) put(value : V) -> Done
