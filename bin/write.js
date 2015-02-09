@@ -1,8 +1,6 @@
 "use strict";
 
-var Task, rt, sys;
-
-sys = require("sys");
+var Task, rt;
 
 Task = require("../lib/task");
 rt = require("../lib/runtime");
@@ -24,11 +22,11 @@ function toString(value) {
 }
 
 function writeGreen(value) {
-  sys.puts("\x1b[0;32;48m" + value + " \x1b[0m");
+  console.log("\x1b[0;32;48m" + value + " \x1b[0m");
 }
 
 function writeRed(value) {
-  sys.error("\x1b[0;31;48m" + value + " \x1b[0m");
+  console.error("\x1b[0;31;48m" + value + " \x1b[0m");
 }
 
 function writeError(error) {
@@ -66,7 +64,7 @@ function writeError(error) {
 
             return line;
           }).then(function (line) {
-            sys.error(line.replace(/\s+$/g, ""));
+            console.error(line.replace(/\s+$/g, ""));
           });
         });
       }
