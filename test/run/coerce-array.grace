@@ -1,1 +1,1 @@
-sequence.empty.asPrimitiveArray.size
+list.empty.asPrimitiveArray.size

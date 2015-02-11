@@ -1,0 +1,3 @@
+object {
+  inherits list.empty
+}

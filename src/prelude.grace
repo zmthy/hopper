@@ -49,14 +49,18 @@ def SubobjectResponsibility : ExceptionPattern = object {
   }
 }
 
-type List<T> = Sequence<T> & type {
+type MutableList<T> = List<T> & type {
   // Insert an element at the given index, overwriting and returning the element
   // at that position.
   // Raises an Out Of Bounds if the index is not within the bounds of the list.
   at(index : Number) put(element : T) -> T
 
   // Add an element to the end of the list.
+  // Raises an Out Of Bounds if the index is not within the bounds of the list.
   add(element : T) -> Done
+
+  // Remove and return the element at the given index.
+  removeAt(index : Number) -> T
 
   // Remove the given element, returning the index where it was found.
   // Returns the result of the given action if the element is not present.
@@ -67,17 +71,20 @@ type List<T> = Sequence<T> & type {
   remove(element : T) -> Number
 }
 
-def list = object {
-  inherits delegateTo(sequence)
+def mutableList = object {
+  inherits delegateTo(list)
 
-  constructor withAll<T>(elements : Sequence<T>) -> List<T> {
-    inherits sequence.withAll<T>(elements)
+  constructor withAll<T>(elements : Do<T>) -> MutableList<T> {
+    inherits list.withAll<T>(elements)
 
-    method at(index : Number) put(element : T) -> T {
+    method boundsCheck(index : Number) -> Done is confidential {
       if ((index < 1) || (index > size)) then {
         OutOfBounds.raiseForIndex(index)
       }
+    }
 
+    method at(index : Number) put(element : T) -> T {
+      boundsCheck(index)
       internalSplice(index - 1, 1, element)
     }
 
@@ -85,15 +92,13 @@ def list = object {
       internalPush(element)
     }
 
-    method remove(element : T) ifAbsent<U>(action : Action<U>) -> Number | U {
-      for (indices) do { i ->
-        if (at(i) == element) then {
-          internalSplice(i - 1, 1)
-          return i
-        }
-      }
+    method removeAt(index : Number) -> T {
+      boundsCheck(index)
+      internalSplice(index - 1, 1)
+    }
 
-      action.apply
+    method remove(element : T) ifAbsent<U>(action : Action<U>) -> Number | U {
+      internalRemove(element, action)
     }
 
     method remove(element : T) -> Number {
@@ -101,20 +106,10 @@ def list = object {
         FailedSearch.raiseForObject(element)
       }
     }
-
-    method asString -> String {
-      if (size == 0) then {
-        "[]"
-      } else {
-        "[{sliceFrom(2).fold { s, e ->
-          "{s}, {e.asString}"
-        } startingWith(at(1).asString)}]"
-      }
-    }
   }
 
   method asString -> String {
-    "list"
+    "mutableList"
   }
 }
 
