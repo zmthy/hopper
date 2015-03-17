@@ -1,3 +1,3 @@
-dialect "typed"
+dialect "branded"
 
 mutableList
