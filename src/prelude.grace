@@ -7,6 +7,8 @@ method prelude {
   self
 }
 
+def standardPrelude is public = self
+
 method unless(cond : Boolean) then(then : Action) -> Done {
   cond.orElse(then)
   done
