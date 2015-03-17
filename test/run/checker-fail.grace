@@ -1,3 +1,3 @@
-method checker(nodes) {
+method check(nodes) {
   CheckerFailure.raiseDefault
 }
