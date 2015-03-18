@@ -488,6 +488,13 @@ constructor typeChecker {
         })
     }
 
+    constructor unnamedTypeDeclaration(name : String)
+        of(value' : ObjectType) -> TypeDecl {
+      inherits field(name) ofType(objectType.pattern)
+
+      def value : Object is public = value'
+    }
+
     constructor typeDeclaration(name : String)
         of(value' : ObjectType) -> TypeDecl {
       inherits field(name) ofType(objectType.pattern)
@@ -508,12 +515,20 @@ constructor typeChecker {
         returnType(returnType')
     }
 
+    constructor operator(name' : String) parameter(param : Parameter)
+        returnType(returnType' : ObjectType) -> MethodType {
+      inherits signature(list.with(part.name(name')
+        parameters(list.with(param)))) returnType(returnType')
+
+      def name : String is public = name'
+    }
+
     constructor signature(signature' : Signature)
         returnType(returnType' : ObjectType) -> MethodType {
       def signature : Signature is public = signature'.asImmutable
       def returnType : ObjectType is public = returnType'
 
-      method name {
+      method name -> String {
         if (signature.first.parameters.isEmpty) then {
           signature.first.name
         } else {
@@ -525,8 +540,11 @@ constructor typeChecker {
               output := "{part.name}()"
             } else {
               output := " {part.name}()"
+              once := true
             }
           }
+
+          output
         }
       }
 
@@ -577,6 +595,14 @@ constructor typeChecker {
     }
 
     method fromNode(node : Node.Signature) -> MethodType {
+      def firstPart = node.parts.first
+      if (firstPart.name.isOperator) then {
+        return methodType.operator(firstPart.name)
+          parameter(parameter.ofType(objectType
+            .fromPatterned(firstPart.parameters.first)))
+          returnType(objectType.fromPatterned(node))
+      }
+
       def sig = mutableList.empty
 
       for (node.parts) do { aPart ->
@@ -786,7 +812,7 @@ constructor typeChecker {
       }
 
       method isSupertypeOf(_ : ObjectType) -> Boolean {
-        false
+        isStructural && methods.isEmpty
       }
 
       method asString -> String {
@@ -956,9 +982,8 @@ constructor typeChecker {
   }
 
   def asStringType = methodType.field("asString") ofType(objectType.string)
-  def equalsType = methodType.signature(list.with(part.name("==")
-      parameters(list.with(parameter.ofType(objectType.empty)))))
-    returnType(objectType.boolean)
+  def equalsType = methodType.operator("==")
+    parameter(parameter.ofType(objectType.empty)) returnType(objectType.boolean)
 
   method intersectionOf(a : Set<MethodType>)
       and(b : Set<MethodType>) -> Set<MethodType> is confidential {

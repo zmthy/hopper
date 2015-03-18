@@ -12,12 +12,16 @@ let BrandError = typed.TypeError.refine "Brand Error"
 // The PreBrand type is the structural type of a brand object.
 let PreBrand is confidential = ObjectAnnotator & type {
   Type -> Pattern
+  extend -> Brand
+  +(other : Brand) -> Brand
 }
 
 // All but one pre-brand should be created by inheritance from the brand
 // constructor below. The pre-brand class is necessary to generate a brand-like
 // object which will tag true brand objects.
-class preBrand.new -> PreBrand is confidential, renamed {
+class preBrand.new -> PreBrand is confidential {
+
+  def superBrands = set.empty
 
   // This is required for access to the outer object inside the Type.
   def this = self
@@ -28,18 +32,41 @@ class preBrand.new -> PreBrand is confidential, renamed {
     mirrors.reflect(obj).metadata.add(this)
   }
 
-  let Type = object {
+  let Type is unnamed = object {
     inherits pattern.abstract
 
     method match(obj : Object) {
       // The metadata property on an object mirror is a weak set, which ensures
       // that the tag cannot be exposed to other users.
-      mirrors.reflect(obj).metadata.has(this)
+      mirrors.reflect(obj).metadata.has(this).orElse {
+        matchSuperBrands(obj)
+      }
+    }
+
+    method matchSuperBrands(obj : Object) {
+      for (superBrands) do { superBrand ->
+        def matched = superBrand.Type.match(obj)
+        if (matched) then {
+          return matched
+        }
+      }
+
+      false
     }
 
     method asString -> String {
       "{this.asString}.Type"
     }
+  }
+
+  method extend -> Brand {
+    self + brand
+  }
+
+  constructor +(other : Brand) -> Brand {
+    inherits brand
+
+    def superBrands = set.with(this, other)
   }
 
   method asString -> String {
@@ -70,63 +97,6 @@ constructor brandChecker {
   let aBrandTypeType = brand
   let BrandTypeType = aBrandTypeType.Type
 
-  // Note the dynamic use of a brand pattern here.
-  class tagged.withType(BType : Pattern) -> ObjectType {
-    inherits objectType.base
-
-    // There's some identity issues with delegation, so we use the object
-    // identity of a tag to identify this type statically.
-    let tag = object {}
-
-    method hasSameTag(oType : ObjectType) -> Boolean {
-      match (oType)
-        case { bt : BType -> tag == bt.tag }
-        case { _ -> false }
-    }
-
-    method isSubtypeOf(oType : ObjectType) -> Boolean {
-      // As in the structural types, it's important that the argument have a say
-      // in this relationship.
-      oType.isSupertypeOf(self).orElse {
-        hasSameTag(oType)
-      }
-    }
-
-    method isSupertypeOf(oType : ObjectType) -> Boolean {
-      hasSameTag(oType)
-    }
-  }
-
-  // A brand type-type is an ObjectType with no inherent methods and is only a
-  // subtype of itself.
-  class brandTypeType.forBrand(brand) -> ObjectType is aBrandTypeType {
-    inherits tagged.withType(BrandTypeType)
-
-    def methods is public = set.empty<MethodType>
-
-    method asString -> String {
-      "{brand}.Type"
-    }
-  }
-
-  // A brand type is an ObjectType which contains a unique brand type-type.
-  class brandType.new -> ObjectType is aBrandType {
-    inherits tagged.withType(BrandType)
-
-    var name : String is public := "Brand"
-
-    def bType = brandTypeType.forBrand(self)
-    def mType = methodType.typeDeclaration("Type") of(bType)
-
-    def methods is public = set.with<MethodType>(mType)
-
-    let Type = bType
-
-    method asString -> String {
-      name
-    }
-  }
-
   rule { obj : ObjectConstructor ->
     // This looks like it's recursive, but the existing rule in the structural
     // type checker has already given a rule for this object, and that type is
@@ -153,30 +123,189 @@ constructor brandChecker {
     }
   }
 
+  // The static representation of the 'Brand' type above.
+  def theBrandType = object {
+    inherits objectType.base
+
+    // We don't need to include the structural information, because our other
+    // rules intercept this type and replace it with something more specific.
+    def methods is public = set.empty<MethodType>
+
+    method isSubtypeOf(oType : ObjectType) -> Boolean {
+      oType.isSupertypeOf(self).orElse {
+        self == oType
+      }
+    }
+
+    method isSupertypeOf(oType : ObjectType) -> Boolean {
+      (self == oType).orElse {
+        BrandType.match(oType)
+      }
+    }
+
+    method asString -> String {
+      "Brand"
+    }
+  }
+
   method check(nodes : List<Node>) inDialect(dia : Object) -> Done {
     mirrors.reflect(dia).insertInto(scope.local) withUnknown(objectType.unknown)
 
     // The method-type for the brand constructor.
     def brandConstructor : MethodType = object {
-      inherits methodType.field("brand") ofType(objectType.unknown)
+      inherits methodType.field("brand") ofType(theBrandType)
 
       // A cute trick: where we would normally expect this to be a static
       // reference, every request to the return type of the method produces a
       // new brand type.
       method returnType -> ObjectType {
-        brandType.new
+        brandType.fresh
       }
 
       // The price of the trick: the super asString is stateful.
       method asString -> String {
-        "{signature.concatenateSeparatedBy(" ")} -> {Brand}"
+        "{signature.concatenateSeparatedBy(" ")} -> Brand"
       }
     }
 
     scope.at("brand") put(brandConstructor)
 
+    def letBrand : MethodType = object {
+      inherits methodType.typeDeclaration("Brand") of(theBrandType)
+
+      // Like the trick above, but this time when the method is interpreted as
+      // a type.
+      method value -> ObjectType {
+        brandType.fresh
+      }
+    }
+
+    scope.at("Brand") put(methodType.typeDeclaration("Brand"))
+
     scope.enter {
       check(nodes)
+    }
+  }
+
+  // Note the dynamic use of a brand pattern here.
+  class tagged.withType(BType : Pattern) -> ObjectType {
+    inherits objectType.base
+
+    // There are identity issues with delegation, so the tags are separate
+    // objects which can safely be matched for identity.
+    let tag = object {}
+
+    method isSubtypeOf(oType : ObjectType) -> Boolean {
+      // As in the structural types, it's important that the argument have a say
+      // in this relationship.
+      oType.isSupertypeOf(self).orElse {
+        match (oType)
+          case { bt : BType -> tag == bt.tag }
+          case { _ -> false }
+      }
+    }
+
+    method isSupertypeOf(oType : ObjectType) -> Boolean {
+      match (oType)
+        case { bt : BType -> tag == bt.tag }
+        case { _ -> false }
+    }
+  }
+
+  // A brand type-type is an ObjectType with pattern methods and is only a
+  // subtype of itself.
+  class brandTypeType.forBrand(brand) -> ObjectType is aBrandTypeType {
+    inherits tagged.withType(BrandTypeType)
+
+    def methods is public = objectType.pattern.methods
+
+    method asString -> String {
+      "{brand}.Type"
+    }
+  }
+
+  // A brand type is an ObjectType which contains a unique brand type-type.
+  def brandType = object {
+    method base -> ObjectType {
+      object is aBrandType {
+        inherits tagged.withType(BrandType)
+
+        def this = self
+
+        var name : String is public := "Brand"
+
+        let Type is unnamed = buildBrandType
+
+        def mType = methodType.unnamedTypeDeclaration("Type") of(Type)
+
+        // Uses the same returnType trick from above.
+        def eType = object {
+          inherits methodType.field("extend") ofType(theBrandType)
+
+          method returnType -> ObjectType {
+            brandType.fromBrands(this, brandType.fresh)
+          }
+
+          method asString -> String {
+            "{signature.concatenateSeparatedBy(" ")} -> Brand"
+          }
+        }
+
+        // The trick doesn't work here, because the return type is dependent on the
+        // value of one of the arguments. We need an extra rule to handle this.
+        def pType = object {
+          inherits methodType.operator("+")
+              parameter(parameter.ofType(theBrandType)) returnType(theBrandType)
+        }
+
+        def methods is public = set.with<MethodType>(mType, eType, pType)
+
+        method asString -> String {
+          name
+        }
+      }
+    }
+
+    constructor fresh -> ObjectType {
+      inherits base
+
+      method buildBrandType -> ObjectType is confidential {
+        brandTypeType.forBrand(self)
+      }
+    }
+
+    constructor fromBrands(first : BrandType, *rest : BrandType) -> ObjectType {
+      inherits base
+
+      method buildBrandType -> ObjectType is confidential {
+        var bType := first.Type
+
+        for (rest) do { br ->
+          bType := bType & br.Type
+        }
+
+        bType
+      }
+    }
+  }
+
+  // The return type of the + method on brands is dependent on the argument, so
+  // we need to have an explicit rule for it.
+  rule { req : QualifiedRequest ->
+    if (req.name == "+") then {
+      def rType = typeOf(req.receiver)
+
+      match (rType)
+        case { rType' : BrandType ->
+           def aType = typeOf(req.parts.first.arguments.first)
+
+           match (aType)
+             case { aType' : BrandType -> brandType.fromBrands(rType', aType') }
+             // If we can't resolve the argument, just extend the receiver.
+             case { _ -> brandType.fromBrands(rType', brandType.new) }
+        } case { _ -> typeOf(req) }
+    } else {
+      typeOf(req)
     }
   }
 }
