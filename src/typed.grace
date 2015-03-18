@@ -44,18 +44,25 @@ constructor typeChecker {
   // Type declarations.
   rule { decl : Let ->
     def name = decl.name.value
+    def value = decl.value
+
+    def staticValue = scope.enter {
+      for (decl.generics) do { generic ->
+        def gName = generic.value
+        def gType = objectType.unknownNamed(gName)
+        scope.at(gName) put(methodType.staticDeclaration(gName) of(gType))
+      }
+
+      runRules(value)
+      objectType.fromExpression(value)
+    }
 
     scope.at(name)
-      put(setPublicityOf(methodType.typeDeclaration(name) of(scope.enter {
-        for (decl.generics) do { generic ->
-          def gName = generic.value
-          def gType = objectType.unknownNamed(gName)
-          scope.at(gName) put(methodType.typeDeclaration(gName) of(gType))
-        }
-
-        runRules(decl.value)
-        objectType.fromExpression(decl.value)
-      })) fromNode(decl))
+      put(setPublicityOf(if (staticValue.isUnknown) then {
+        methodType.staticDeclaration(name) ofType(typeOf(value))
+      } else {
+        methodType.typeDeclaration(name) of(staticValue)
+      }) fromNode(decl))
   }
 
   // Imports. At the moment there's no way to retrieve the type of the imported
@@ -279,8 +286,6 @@ constructor typeChecker {
   rule { req : UnqualifiedRequest ->
     def name = req.name
 
-    print(scope.find(uglify(name)) ifAbsent {})
-
     checkAndTypeRequest(req) against(scope.find(uglify(name)) ifAbsent {
       RequestError.raise "Cannot find definition «{name}»" forNode(req)
     })
@@ -310,9 +315,14 @@ constructor typeChecker {
     } else {
       def name = req.name
       def meth = rType.methodNamed(name) ifAbsent {
-        RequestError
-          .raise "No such method «{name}» in «{rec}» of type «{rType}»"
-          forNode(req)
+        match (uglify(name))
+          case { "asString" -> asStringType }
+          case { "==" | "!=" -> equalsType }
+          case { _ ->
+            RequestError
+              .raise "No such method «{name}» in «{rec}» of type «{rType}»"
+              forNode(req)
+          }
       }
 
       checkAndTypeRequest(req) against(meth)
@@ -428,6 +438,14 @@ constructor typeChecker {
       parameters(parameters' : List<Parameter>) -> Part {
     def name : String is public = name'
     def parameters : List<Parameter> is public = parameters'
+
+    method asString -> String {
+      if (parameters.isEmpty) then {
+        name
+      } else {
+        "{name}({parameters.concatenateSeparatedBy(", ")})"
+      }
+    }
   }
 
   let Signature = List<Part>
@@ -453,16 +471,34 @@ constructor typeChecker {
   def methodType = object {
 
     constructor field(name : String)
-        ofType(returnType : ObjectType) -> MethodType {
+        ofType(returnType' : ObjectType) -> MethodType {
       inherits signature(list.with(part.name(name) parameters(list.empty)))
-        returnType(returnType)
+        returnType(returnType')
+    }
+
+    constructor staticDeclaration(name : String)
+        ofType(returnType' : ObjectType) -> MethodType {
+      inherits signature(list.with(part.name(name) parameters(list.empty)))
+        returnType(object {
+          inherits delegateTo(returnType')
+
+          method asString -> String {
+            name
+          }
+        })
     }
 
     constructor typeDeclaration(name : String)
         of(value' : ObjectType) -> TypeDecl {
       inherits field(name) ofType(objectType.pattern)
 
-      def value : ObjectType is public = value'
+      def value : Object is public = object {
+        inherits delegateTo(value')
+
+        method asString -> String {
+          name
+        }
+      }
     }
 
     constructor named(name' : String)
@@ -477,45 +513,21 @@ constructor typeChecker {
       def signature : Signature is public = signature'.asImmutable
       def returnType : ObjectType is public = returnType'
 
-      var name : String is readable
-      var show : String
-      var once : Boolean := false
+      method name {
+        if (signature.first.parameters.isEmpty) then {
+          signature.first.name
+        } else {
+          var once : Boolean := false
+          var output : String
 
-      def fst = signature.first
-
-      if (fst.parameters.isEmpty) then {
-        name := fst.name
-        show := name
-      } else {
-        for (signature) do { part ->
-          if (once) then {
-            name := "{name} {part.name}()"
-            show := "{show} {part.name}("
-          } else {
-            name := "{part.name}()"
-            show := "{part.name}("
-            once := true
-          }
-
-          var once' : Boolean := false
-
-          for (part.parameters) do { param ->
-            if (once') then {
-              show := "{show}, "
+          for (signature) do { part ->
+            if (once) then {
+              output := "{part.name}()"
+            } else {
+              output := " {part.name}()"
             }
-
-            show := "{show}{param}"
-            once' := true
           }
-
-          show := "{show})"
         }
-
-        name := name.substringFrom(1) to(name.size - 2)
-      }
-
-      if (!returnType.isUnknown) then {
-        show := "{show} -> {returnType}"
       }
 
       // Determines if this method is a specialisation of the given one.
@@ -554,7 +566,13 @@ constructor typeChecker {
       var isPublic : Boolean is public := true
 
       method asString -> String {
-        show
+        def sig = signature.concatenateSeparatedBy(" ")
+
+        if (returnType.isUnknown) then {
+          sig
+        } else {
+          "{sig} -> {returnType}"
+        }
       }
     }
 
@@ -639,7 +657,11 @@ constructor typeChecker {
     methodNamed(name : String)
       ifAbsent<T>(onAbsent : Action<T>) -> MethodType | T
     isUnknown -> Boolean
+    isStructural -> Booealn
     isSubtypeOf(other : ObjectType) -> Boolean
+    // Used for redispatch in isSubtypeOf(), and does not actually represent a
+    // calculation of whether this type is a supertype of the given one.
+    isSupertypeOf(other : ObjectType) -> Boolean
     |(other : ObjectType) -> ObjectType
     &(other : ObjectType) -> ObjectType
   }
@@ -698,6 +720,10 @@ constructor typeChecker {
         }
     }
 
+    constructor empty -> ObjectType {
+      inherits fromMethods(set.empty<MethodType>) named("Object")
+    }
+
     constructor fromMethods(methods' : Set<MethodType>)
         named(name : String) -> ObjectType {
       inherits fromMethods(methods')
@@ -711,9 +737,15 @@ constructor typeChecker {
       inherits base
 
       def methods : Set<MethodType> is public = methods'.asImmutable
+      def isStructural : Boolean is public = true
 
       method isSubtypeOf(oType : ObjectType) -> Boolean {
-        isSubtypeOf(oType) withAssumptions(mutableDictionary.empty)
+        // Let the given type have a say.
+        oType.isSupertypeOf(self).orElse {
+          oType.isStructural.andAlso {
+            isSubtypeOf(oType) withAssumptions(mutableDictionary.empty)
+          }
+        }
       }
 
       method isSubtypeOf(oType : ObjectType)
@@ -753,6 +785,10 @@ constructor typeChecker {
         true
       }
 
+      method isSupertypeOf(_ : ObjectType) -> Boolean {
+        false
+      }
+
       method asString -> String {
         match (methods.size)
           case { 0 -> "type \{\}"}
@@ -766,7 +802,13 @@ constructor typeChecker {
 
       def methods : Set<MethodType> is public = set.empty
 
-      method isSubtypeOf(other : ObjectType) -> Boolean {
+      method isSubtypeOf(oType : ObjectType) -> Boolean {
+        oType.isSupertypeOf(oType).orElse {
+          self == other
+        }
+      }
+
+      method isSupertypeOf(oType : ObjectType) -> Boolean {
         self == other
       }
 
@@ -785,6 +827,10 @@ constructor typeChecker {
       }
 
       method isSubtypeOf(_ : ObjectType) -> Boolean {
+        true
+      }
+
+      method isSupertypeOf(other : ObjectType) -> Boolean {
         true
       }
 
@@ -812,6 +858,9 @@ constructor typeChecker {
       }
     }
 
+    def boolean : ObjectType is public = unknown
+    def number : ObjectType is public = unknown
+    def string : ObjectType is public = unknown
     def pattern : ObjectType is public = unknown
 
     let Patterned = type {
@@ -824,7 +873,7 @@ constructor typeChecker {
       })
     }
 
-    constructor base -> ObjectType is confidential {
+    constructor base -> ObjectType {
       method methodNamed(name : String)
           ifAbsent<T>(onAbsent : Action<T>) -> MethodType | T {
         for (methods) do { meth ->
@@ -836,9 +885,8 @@ constructor typeChecker {
         onAbsent.apply
       }
 
-      method isUnknown -> Boolean {
-        false
-      }
+      def isStructural : Boolean is public = false
+      def isUnknown : Boolean is public = false
 
       method &(other : ObjectType) -> ObjectType {
         and(self, other)
@@ -859,10 +907,16 @@ constructor typeChecker {
       def methods : Set<MethodType> is public = a.methods ++ b.methods
 
       method isSubtypeOf(oType : ObjectType) -> Boolean {
-        // TODO This isn't quite correct for structural types, which should do
-        // a structural union of the method signatures.
-        a.isSubtypeOf(oType).andAlso {
-          b.isSubtypeOf(oType)
+        oType.isSupertypeOf(self).orElse {
+          a.isSubtypeOf(oType).orElse {
+            b.isSubtypeOf(oType)
+          }
+        }
+      }
+
+      method isSupertypeOf(oType : ObjectType) -> Boolean {
+        oType.isSubtypeOf(a).andAlso {
+          oType.isSubtypeOf(b)
         }
       }
 
@@ -878,8 +932,16 @@ constructor typeChecker {
         intersectionOf(a.methods) and(b.methods)
 
       method isSubtypeOf(oType : ObjectType) -> Boolean {
-        a.isSubtypeOf(oType).orElse {
-          b.isSubtypeOf(oType)
+        oType.isSupertypeOf(self).orElse {
+          a.isSubtypeOf(oType).andAlso {
+            b.isSubtypeOf(oType)
+          }
+        }
+      }
+
+      method isSupertypeOf(oType : ObjectType) -> Boolean {
+        oType.isSubtypeOf(a).orElse {
+          oType.isSubtypeOf(b)
         }
       }
 
@@ -892,6 +954,11 @@ constructor typeChecker {
       "objectType"
     }
   }
+
+  def asStringType = methodType.field("asString") ofType(objectType.string)
+  def equalsType = methodType.signature(list.with(part.name("==")
+      parameters(list.with(parameter.ofType(objectType.empty)))))
+    returnType(objectType.boolean)
 
   method intersectionOf(a : Set<MethodType>)
       and(b : Set<MethodType>) -> Set<MethodType> is confidential {
