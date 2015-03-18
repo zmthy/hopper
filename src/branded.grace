@@ -174,13 +174,13 @@ constructor brandChecker {
       inherits methodType.typeDeclaration("Brand") of(theBrandType)
 
       // Like the trick above, but this time when the method is interpreted as
-      // a type.
+      // a type, rather than the type of what the method returns.
       method value -> ObjectType {
         brandType.fresh
       }
     }
 
-    scope.at("Brand") put(methodType.typeDeclaration("Brand"))
+    scope.at("Brand") put(letBrand)
 
     scope.enter {
       check(nodes)
@@ -232,7 +232,7 @@ constructor brandChecker {
 
         def this = self
 
-        var name : String is public := "Brand"
+        var name : String is public := "brand"
 
         let Type is unnamed = buildBrandType
 

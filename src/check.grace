@@ -16,6 +16,10 @@ let aD = anA + aC
 
 def a : aD.Type = object is anA, aC {}
 
+// method go(b : Brand) {
+//   def c : b.Type = object is b {}
+// }
+
 // let anA = brand
 // let aB = brand
 // let aC = anA + aB
