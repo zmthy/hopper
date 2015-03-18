@@ -279,6 +279,8 @@ constructor typeChecker {
   rule { req : UnqualifiedRequest ->
     def name = req.name
 
+    print(scope.find(uglify(name)) ifAbsent {})
+
     checkAndTypeRequest(req) against(scope.find(uglify(name)) ifAbsent {
       RequestError.raise "Cannot find definition «{name}»" forNode(req)
     })

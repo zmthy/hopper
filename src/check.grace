@@ -1,3 +1,6 @@
 dialect "branded"
 
-mutableList
+let anA = brand
+let A = anA.Type
+
+def a : A = object {}
