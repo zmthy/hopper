@@ -95,12 +95,6 @@ constructor typeChecker {
     def name = decl.name.value
     def annType = declPattern(decl)
 
-    if (!annType.isSubtypeOf(objectType.pattern)) then{
-      DeclarationError
-        .raise("The expression «{decl.pattern}» of type «{annType}» does" ++
-          " not satisfy the type «Pattern» on the declaration «{name}»") forNode(value)
-    }
-
     def value = decl.value
     def vType = typeOf(value)
 
@@ -695,7 +689,7 @@ constructor typeChecker {
     methodNamed(name : String)
       ifAbsent<T>(onAbsent : Action<T>) -> MethodType | T
     isUnknown -> Boolean
-    isStructural -> Booealn
+    isStructural -> Boolean
     isSubtypeOf(other : ObjectType) -> Boolean
     // Used for redispatch in isSubtypeOf(), and does not actually represent a
     // calculation of whether this type is a supertype of the given one.
@@ -726,6 +720,12 @@ constructor typeChecker {
     }
 
     method fromExpression(expression : Expression) -> ObjectType {
+      def eType = typeOf(expression)
+      if (!eType.isSubtypeOf(objectType.pattern)) then {
+        DeclarationError.raise("The expression «{expression}» of type " ++
+          "«{eType}» does not satisfy the type «Pattern»") forNode(expression)
+      }
+
       match (expression)
         case { req : UnqualifiedRequest ->
           match (scope.find(uglify(req.name)) ifAbsent { return unknown })
@@ -758,7 +758,7 @@ constructor typeChecker {
         }
     }
 
-    constructor empty -> ObjectType {
+    def empty : ObjectType is public = object {
       inherits fromMethods(set.empty<MethodType>) named("Object")
     }
 
@@ -896,10 +896,14 @@ constructor typeChecker {
       }
     }
 
-    def boolean : ObjectType is public = unknown
-    def number : ObjectType is public = unknown
-    def string : ObjectType is public = unknown
-    def pattern : ObjectType is public = unknown
+    def boolean : ObjectType is public =
+      mirrors.reflect(Boolean).asObjectTypeWithEmpty(empty) unknown(unknown)
+    def number : ObjectType is public =
+      mirrors.reflect(Number).asObjectTypeWithEmpty(empty) unknown(unknown)
+    def string : ObjectType is public =
+      mirrors.reflect(String).asObjectTypeWithEmpty(empty) unknown(unknown)
+    def pattern : ObjectType is public =
+      mirrors.reflect(Pattern).asObjectTypeWithEmpty(empty) unknown(unknown)
 
     let Patterned = type {
       patternOrIfAbsent<T>(onAbsent : Procedure<T>) -> ObjectType | T
@@ -921,6 +925,43 @@ constructor typeChecker {
         }
 
         onAbsent.apply
+      }
+
+      method isSubtypeOf(oType : ObjectType)
+          withAssumptions(assumptions :
+            MutableDictionary<ObjectType, MutableSet<ObjectType>>) -> Boolean {
+        if (oType.isUnknown || assumptions.at(self) ifAbsent {
+          def against = mutableSet.empty<ObjectType>
+          assumptions.at(self) put(against)
+          against
+        }.contains(oType)) then {
+          return true
+        }
+
+        assumptions.at(self) do { assume -> assume.add(oType) }
+
+        for (oType.methods) do { oMeth ->
+          def sMeth = methodNamed(oMeth.name) ifAbsent { return false }
+
+          for (oMeth.signature) and(sMeth.signature) do { oPart, sPart ->
+            if (oPart.parameters.size != sPart.parameters.size) then {
+              return false
+            }
+
+            for (oPart.parameters) and(sPart.parameters) do { oParam, sParam ->
+              if (!oParam.pattern.isSubtypeOf(sParam.pattern)
+                  withAssumptions(assumptions)) then {
+                return false
+              }
+            }
+          }
+
+          if (!sMeth.returnType.isSubtypeOf(oMeth.returnType)) then {
+            return false
+          }
+        }
+
+        true
       }
 
       def isStructural : Boolean is public = false
@@ -1022,7 +1063,8 @@ constructor typeChecker {
   }
 
   method check(nodes : List<Node>) inDialect(dia : Object) -> Done {
-    mirrors.reflect(dia).insertInto(scope.local) withUnknown(objectType.unknown)
+    mirrors.reflect(dia).insertInto(scope.local) withEmpty(objectType.empty)
+      unknown(objectType.unknown) pattern(objectType.pattern)
 
     scope.enter {
       check(nodes)

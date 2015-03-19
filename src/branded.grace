@@ -146,7 +146,8 @@ constructor brandChecker {
   }
 
   method check(nodes : List<Node>) inDialect(dia : Object) -> Done {
-    mirrors.reflect(dia).insertInto(scope.local) withUnknown(objectType.unknown)
+    mirrors.reflect(dia).insertInto(scope.local) withEmpty(objectType.empty)
+      unknown(objectType.unknown) pattern(objectType.pattern)
 
     // The method-type for the brand constructor.
     def brandConstructor : MethodType = object {

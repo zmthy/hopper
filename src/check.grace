@@ -1,5 +1,9 @@
 dialect "branded"
 
+def a : Pattern = object {}
+
+def b : a = object {}
+
 //let anA = brand
 //let A = anA.Type
 
