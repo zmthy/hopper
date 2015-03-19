@@ -105,7 +105,7 @@ if (interactive) {
   }
 } else {
   fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
-  hopper.load(fname, function (error) {
+  new hopper.Interpreter(loader).load(fname, function (error) {
     if (error !== null) {
       write.writeError(error).then(function () {
         process.exit(1);

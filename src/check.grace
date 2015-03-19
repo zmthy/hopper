@@ -1,11 +1,10 @@
 dialect "branded"
 
-def a : Pattern = object {}
+let anA = brand
+let A = anA.Type
 
-def b : a = object {}
-
-//let anA = brand
-//let A = anA.Type
+// Invalid: the object is not branded anA.
+def a : A = object is anA {}
 
 //class a.new -> A is anA {}
 //class b.new -> A {}

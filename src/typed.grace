@@ -721,10 +721,6 @@ constructor typeChecker {
 
     method fromExpression(expression : Expression) -> ObjectType {
       def eType = typeOf(expression)
-      if (!eType.isSubtypeOf(objectType.pattern)) then {
-        DeclarationError.raise("The expression «{expression}» of type " ++
-          "«{eType}» does not satisfy the type «Pattern»") forNode(expression)
-      }
 
       match (expression)
         case { req : UnqualifiedRequest ->

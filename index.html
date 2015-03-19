@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Brand Objects for Nominal Typing</title>
+  </head>
+  <body>
+    <h1>Brand Objects for Nominal Typing</h1>
+    <p>
+In Brand Objects for Nominal Typing, we describe an implementation of a
+branding system for both runtime and static types. This artifact provides the
+extended form of Hopper, an interpreter for the Grace programming language, and
+an extra module which defines both the dynamic objects and the modular static
+type checker. The extra module extends the existing structural type checker in
+the provided version of Hopper, and is capable of statically checking code
+which interacts with statically determinable declarations of brand objects,
+including singleton brand constructors, brand sums, and dynamic variables which
+are known to contain some brand value at runtime. The dynamic brand objects
+extend this behaviour to the runtime, enforcing non-static contracts and
+allowing runtime type testing.
+    </p>
+    <h2>The Artifact</h2>
+    <p>
+The artifact is provided as a Virtual Box image of a NixOS install. The instance
+of Hopper is provided on the desktop of the image. The image comes preinstalled
+with an appropriate version of Node.js.
+    </p>
+    <p>
+The primary contribution of the artifact is the module defined in
+<code>src/branded.grace</code>, which defines the mechanisms described in the
+paper, including the <code>brand</code> constructor, and a static type checker
+for modules which opt into branding.
+    </p>
+    <p>
+The artifact also comes with a series of small test modules. In order to run the
+tests, move into the <code>hopper/src</code> directory in the terminal, and
+execute <code>./run-brand-tests.js</code>. This will show the source of each
+test, and then run it (including the static checks). Arbitrary code can be run
+from the src directory using the executable in <code>../bin/hopper.js</code>.
+    </p>
+    <h2>Caveats</h2>
+    <p>
+Although the branded extension covers what is described in the paper, the
+underlying interpreter is still a prototype, and is subject to some constraints:
+    </p>
+    <ul>
+      <li>
+It's very, very slow. The interpreter was built to solve a specific
+problem that requires a great deal of machinery to perform the simplest
+actions.
+      </li>
+      <li>
+The current lookup mechanism of the language makes it impossible to resolve
+inherits clauses statically, so class type information is lost.
+      </li>
+      <li>
+The type checkers do not understand generics, and will attempt to interpret them
+as unknown types.
+      </li>
+      <li>
+The underlying structural type checker is incomplete, and will often get stuck
+trying to solve structural constraints. Work on this will continue before
+camera-ready.
+      </li>
+    </ul>
+  </body>
+</head>

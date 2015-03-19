@@ -63,6 +63,13 @@ class preBrand.new -> PreBrand is confidential {
     // original receiver rather than this new object.
     def this = outer.this
 
+    // Annotate the object with both.
+    method annotateObject(obj : Object) -> Done {
+      this.annotateObject(obj)
+      other.annotateObject(obj)
+      done
+    }
+
     method matchSuperBrand(obj : Object) {
       other.Type.match(obj)
     }
