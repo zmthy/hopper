@@ -94,6 +94,13 @@ constructor typeChecker {
   rule { decl : Def | Var ->
     def name = decl.name.value
     def annType = declPattern(decl)
+
+    if (!annType.isSubtypeOf(objectType.pattern)) then{
+      DeclarationError
+        .raise("The expression «{decl.pattern}» of type «{annType}» does" ++
+          " not satisfy the type «Pattern» on the declaration «{name}»") forNode(value)
+    }
+
     def value = decl.value
     def vType = typeOf(value)
 
@@ -218,7 +225,7 @@ constructor typeChecker {
     def cType = objectType.fromExpression(sig.patternOrIfAbsent { return })
 
     if (!cType.isUnknown) then {
-      def bType = checkAndTypeConstructor(decl.body)
+      def bType = checkAndTypeConstructor(decl)
 
       if (!bType.isSubtypeOf(cType)) then {
         MethodError
@@ -233,7 +240,7 @@ constructor typeChecker {
   // of the methods defined inside.
   rule { obj : ObjectConstructor ->
     scope.enter {
-      checkAndTypeConstructor(obj.body)
+      checkAndTypeConstructor(obj)
     }
   }
 
@@ -265,11 +272,15 @@ constructor typeChecker {
     objectType.fromMethods(publicMethods)
   }
 
-  method checkAndTypeConstructor(body : List<Node>) -> ObjectType {
+  let Bodied = Node & type {
+    body -> List<Node>
+  }
+
+  method checkAndTypeConstructor(node : Bodied) -> ObjectType {
     def methods = mutableSet.empty<MethodType>
 
-    for (body) do { node ->
-      runRules(node)
+    for (node.body) do { stmt ->
+      runRules(stmt)
 
       for (scope.local.values) do { mType ->
         if (mType.isPublic) then {
@@ -672,7 +683,8 @@ constructor typeChecker {
           match (req.name)
             case { "public" -> return true }
             case { "confidential" -> return false }
-        }
+            case { _ -> }
+        } case { _ -> }
     }
 
     !(Def.match(decl) || Var.match(decl))

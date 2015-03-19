@@ -1,24 +1,47 @@
 dialect "branded"
 
-let anA = brand
+//let anA = brand
+//let A = anA.Type
 
-// def a : anA.Type = object is anA {}
-// def b : anA.Type = object {}
+//class a.new -> A is anA {}
+//class b.new -> A {}
 
-// let aB = anA.extend
+//def a : A = object is anA {}
+//def b : A = object {}
 
-// def b : aB.Type = object is aB {}
-// def c : aB.Type = object is anA {}
-// def d : aB.Type = object {}
+//let aB = anA.extend
+//let B = aB.Type
 
-let aC = brand
-let aD = anA + aC
+//def a : A = object is aB {}
+//def b : B = object is aB {}
+//def c : B = object is anA {}
+//def d : B = object {}
 
-def a : aD.Type = object is anA, aC {}
+//let aC = brand
+//let aD = anA + aC
+//let D = aD.Type
 
-// method go(b : Brand) {
-//   def c : b.Type = object is b {}
-// }
+//def a : D = object {}
+//def b : D = object is anA {}
+//def c : D = object is aC {}
+//def d : D = object is aD {}
+//def e : D = object is anA, aC {}
+
+//method go(aB : Brand) {
+  //let B = aB.Type
+  //def b : B = object is aB {}
+  ////def c : aB.Type = object {}
+//}
+
+//go(brand)
+
+//let o = object {
+  //let anA = brand
+  //let A = anA.Type
+  //def a : A is public = object is anA {}
+//}
+
+//def b : o.A = object {}
 
 // let anA = brand
 // let aB = brand

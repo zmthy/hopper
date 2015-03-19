@@ -28,30 +28,23 @@ class preBrand.new -> PreBrand is confidential {
 
   // When used as an annotation, the pre-brand object tags the metadata of the
   // object with itself.
-  method annotateObject(obj : Object) {
+  method annotateObject(obj : Object) -> Done {
     mirrors.reflect(obj).metadata.add(this)
+    done
   }
+
+  // Be default there is no super brand.
+  method matchSuperBrand(obj : Object) -> Boolean is confidential { false }
 
   let Type is unnamed = object {
     inherits pattern.abstract
 
-    method match(obj : Object) {
+    method match(obj : Object) -> Boolean {
       // The metadata property on an object mirror is a weak set, which ensures
       // that the tag cannot be exposed to other users.
       mirrors.reflect(obj).metadata.has(this).orElse {
-        matchSuperBrands(obj)
+        matchSuperBrand(obj)
       }
-    }
-
-    method matchSuperBrands(obj : Object) {
-      for (superBrands) do { superBrand ->
-        def matched = superBrand.Type.match(obj)
-        if (matched) then {
-          return matched
-        }
-      }
-
-      false
     }
 
     method asString -> String {
@@ -66,7 +59,13 @@ class preBrand.new -> PreBrand is confidential {
   constructor +(other : Brand) -> Brand {
     inherits brand
 
-    def superBrands = set.with(this, other)
+    // The + operator doesn't actually construct a unique brand. Match on the
+    // original receiver rather than this new object.
+    def this = outer.this
+
+    method matchSuperBrand(obj : Object) {
+      other.Type.match(obj)
+    }
   }
 
   method asString -> String {
@@ -97,13 +96,11 @@ constructor brandChecker {
   let aBrandTypeType = brand
   let BrandTypeType = aBrandTypeType.Type
 
-  rule { obj : ObjectConstructor ->
-    // This looks like it's recursive, but the existing rule in the structural
-    // type checker has already given a rule for this object, and that type is
-    // already cached.
-    var oType : ObjectType := typeOf(obj)
+  // Take brand annotations into account when typing object constructors.
+  method checkAndTypeConstructor(node : Bodied) -> ObjectType {
+    var oType : ObjectType := super.checkAndTypeConstructor(node)
 
-    for (obj.annotations) do { ann ->
+    for (node.annotations) do { ann ->
       def annType = typeOf(ann)
 
       if (BrandType.match(annType)) then {
@@ -232,7 +229,7 @@ constructor brandChecker {
 
         def this = self
 
-        var name : String is public := "brand"
+        var name : String is public
 
         let Type is unnamed = buildBrandType
 
@@ -269,6 +266,8 @@ constructor brandChecker {
     constructor fresh -> ObjectType {
       inherits base
 
+      name := "brand"
+
       method buildBrandType -> ObjectType is confidential {
         brandTypeType.forBrand(self)
       }
@@ -276,6 +275,12 @@ constructor brandChecker {
 
     constructor fromBrands(first : BrandType, *rest : BrandType) -> ObjectType {
       inherits base
+
+      name := first.name
+
+      for (rest) do { br ->
+        name := "{name} + {br.name}"
+      }
 
       method buildBrandType -> ObjectType is confidential {
         var bType := first.Type
@@ -305,6 +310,9 @@ constructor brandChecker {
              case { _ -> brandType.fromBrands(rType', brandType.new) }
         } case { _ -> typeOf(req) }
     } else {
+      // This looks like it's recursive, but the existing rule in the structural
+      // type checker has already given a rule for this object, and that type is
+      // already cached.
       typeOf(req)
     }
   }
