@@ -1,0 +1,5 @@
+method prefix!! {}
+
+object {
+  !!outer
+}
