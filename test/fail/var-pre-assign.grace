@@ -1,0 +1,3 @@
+z := object {}
+
+var z
