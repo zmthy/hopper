@@ -9,7 +9,7 @@ fs = require("fs");
 path = require("path");
 
 categories =
-  [ "Control", "Letter", "Number", "Punctuation", "Separator", "Symbol" ];
+  ["Control", "Letter", "Number", "Punctuation", "Separator", "Symbol"];
 
 out = '"use strict";\n';
 

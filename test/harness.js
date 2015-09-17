@@ -147,7 +147,7 @@ runTests("run", function (error) {
     writePass();
   }
 }, function () {
-  pushSummary([ pass, fail, "passed as required" ]);
+  pushSummary([pass, fail, "passed as required"]);
 
   runTests("fail", function (error) {
     if (error !== null) {
@@ -160,7 +160,7 @@ runTests("run", function (error) {
       writeFailure("Failed (completed without error)");
     }
   }, function () {
-    pushSummary([ pass, fail, "failed as required" ]);
+    pushSummary([pass, fail, "failed as required"]);
 
     runTests("parse-fail", function (error) {
       if (error !== null) {
@@ -173,7 +173,7 @@ runTests("run", function (error) {
         writeFailure("Failed (parsed without error)");
       }
     }, function () {
-      summary.push([ pass, fail, "failed parsing as required" ]);
+      summary.push([pass, fail, "failed parsing as required"]);
       summarise();
     });
   });

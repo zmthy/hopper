@@ -4,7 +4,7 @@
 
 "use strict";
 
-var check, fs, fname, hopper, interactive, interpreter,
+var check, fname, fs, hopper, interactive, interpreter,
   loader, options, optparse, path, repl, root, write;
 
 fs = require("fs");
@@ -26,11 +26,11 @@ interactive = false;
 root = null;
 
 options = new optparse.OptionParser([
-  [ "-h", "--help", "Display this help text" ],
-  [ "-c", "--check", "Check the program without running it"],
-  [ "-i", "--interactive", "Run in interactive mode" ],
-  [ "-r", "--root DIR", "Set the root of the module hierarchy" ],
-  [ "-a", "--auto-root", "Use the main module as the root" ]
+  ["-h", "--help", "Display this help text"],
+  ["-c", "--check", "Check the program without running it"],
+  ["-i", "--interactive", "Run in interactive mode"],
+  ["-r", "--root DIR", "Set the root of the module hierarchy"],
+  ["-a", "--auto-root", "Use the main module as the root"]
 ]);
 
 options.on("help", function () {
