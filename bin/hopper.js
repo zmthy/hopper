@@ -4,11 +4,11 @@
 
 "use strict";
 
-var fname, hopper, interactive, interpreter,
-  loader, options, optparse, path, repl, root, sys, write;
+var check, fs, fname, hopper, interactive, interpreter,
+  loader, options, optparse, path, repl, root, write;
 
+fs = require("fs");
 path = require("path");
-sys = require("sys");
 
 optparse = require("optparse");
 
@@ -21,19 +21,25 @@ process.on("uncaughtException", function (error) {
 });
 
 fname = null;
+check = false;
 interactive = false;
 root = null;
 
 options = new optparse.OptionParser([
   [ "-h", "--help", "Display this help text" ],
+  [ "-c", "--check", "Check the program without running it"],
   [ "-i", "--interactive", "Run in interactive mode" ],
   [ "-r", "--root DIR", "Set the root of the module hierarchy" ],
   [ "-a", "--auto-root", "Use the main module as the root" ]
 ]);
 
 options.on("help", function () {
-  sys.puts(options.toString());
+  console.log(options.toString());
   process.exit(0);
+});
+
+options.on("check", function () {
+  check = true;
 });
 
 options.on("interactive", function () {
@@ -87,7 +93,31 @@ if (fname !== null) {
   interactive = true;
 }
 
-if (interactive) {
+if (check) {
+  interpreter = new hopper.Interpreter(loader);
+
+  fs.readFile(fname + ".grace", function (error, code) {
+    if (error !== null) {
+      console.log(error.toString());
+      return;
+    }
+
+    fname = path.basename(fname, ".grace");
+    hopper.check(fname, code.toString(), function (reason, result) {
+      var location;
+
+      if (reason !== null) {
+        write.writeError(reason).then(function () {
+          process.exit(1);
+        });
+      } else if (!result.isSuccess) {
+        write.writeError(result).then(function () {
+          process.exit(1);
+        });
+      }
+    });
+  });
+} else if (interactive) {
   interpreter = new hopper.Interpreter(loader);
 
   if (fname !== null) {

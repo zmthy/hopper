@@ -1,9 +1,11 @@
 "use strict";
 
-var Task, rt;
+var CheckResult, Task, rt;
 
 Task = require("../lib/task");
 rt = require("../lib/runtime");
+
+CheckResult = require("../lib/hopper").CheckResult;
 
 function toString(value) {
   if (!rt.isGraceObject(value)) {
@@ -30,12 +32,19 @@ function writeRed(value) {
 }
 
 function writeError(error) {
-  if (rt.isGraceObject(error)) {
+  var isCheckResult = error.constructor === CheckResult;
+
+  if (rt.isGraceObject(error) || isCheckResult) {
     return toString(error).then(function (string) {
+      var stackTrace;
+
       writeRed(string);
 
-      if (rt.isGraceExceptionPacket(error)) {
-        return Task.each(error.object.stackTrace, function (trace) {
+      if (rt.isGraceExceptionPacket(error) || isCheckResult) {
+        stackTrace = isCheckResult ?
+          error.stackTrace : error.object.stackTrace;
+
+        return Task.each(stackTrace, function (trace) {
           return Task.resolve("\t").then(function (line) {
             if (trace.name !== null) {
               return line + "at «" + trace.name + "» ";
@@ -74,6 +83,7 @@ function writeError(error) {
   }
 
   writeRed("Internal Error: " + (error.message || error));
+
   return Task.resolve();
 }
 
