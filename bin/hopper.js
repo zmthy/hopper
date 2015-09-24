@@ -4,8 +4,8 @@
 
 "use strict";
 
-var check, fname, fs, hopper, interactive, interpreter,
-  loader, options, optparse, path, repl, root, write;
+var check, compile, fname, fs, hopper, interactive,
+  interpreter, loader, options, optparse, path, repl, root, write;
 
 fs = require("fs");
 path = require("path");
@@ -22,12 +22,14 @@ process.on("uncaughtException", function (error) {
 
 fname = null;
 check = false;
+compile = false;
 interactive = false;
 root = null;
 
 options = new optparse.OptionParser([
   ["-h", "--help", "Display this help text"],
-  ["-c", "--check", "Check the program without running it"],
+  ["-t", "--check", "Check the program without running it"],
+  ["-c", "--compile", "Compile the program without running it"],
   ["-i", "--interactive", "Run in interactive mode"],
   ["-r", "--root DIR", "Set the root of the module hierarchy"],
   ["-a", "--auto-root", "Use the main module as the root"]
@@ -40,6 +42,10 @@ options.on("help", function () {
 
 options.on("check", function () {
   check = true;
+});
+
+options.on("compile", function () {
+  compile = true;
 });
 
 options.on("interactive", function () {
@@ -93,53 +99,50 @@ if (fname !== null) {
   interactive = true;
 }
 
+function writeAndExit(reason) {
+  write.writeError(reason).then(function () {
+    process.exit(1);
+  });
+}
+
+function writeAndExitOnError(callback) {
+  return function (reason, result) {
+    if (reason !== null) {
+      writeAndExitOnError(reason);
+    } else {
+      callback && callback(result);
+    }
+  };
+}
+
 if (check) {
   interpreter = new hopper.Interpreter(loader);
 
-  fs.readFile(fname + ".grace", function (error, code) {
-    if (error !== null) {
-      console.log(error.toString());
-      return;
-    }
-
+  fs.readFile(fname + ".grace", writeAndExitOnError(function (code) {
     fname = path.basename(fname, ".grace");
-    hopper.check(fname, code.toString(), function (reason, result) {
-      var location;
-
-      if (reason !== null) {
-        write.writeError(reason).then(function () {
-          process.exit(1);
-        });
-      } else if (!result.isSuccess) {
-        write.writeError(result).then(function () {
-          process.exit(1);
-        });
+    hopper.check(fname, code.toString(), writeAndExitOnError(function (result) {
+      if (!result.isSuccess) {
+        writeAndExit(result);
       }
-    });
-  });
+    }));
+  }));
+} else if (compile) {
+  fs.readFile(fname + ".grace", writeAndExitOnError(function (code) {
+    hopper.compile(fname, code.toString(), writeAndExitOnError(function (text) {
+      console.log(text);
+    }));
+  }));
 } else if (interactive) {
   interpreter = new hopper.Interpreter(loader);
 
   if (fname !== null) {
-    interpreter.interpret('dialect "' + fname + '"', function (error) {
-      if (error !== null) {
-        write.writeError(error).then(function () {
-          process.exit(1);
-        });
-      } else {
-        repl(interpreter);
-      }
-    });
+    interpreter.interpret('dialect "' + fname + '"', writeAndExitOnError(function () {
+      repl(interpreter);
+    }));
   } else {
     repl(interpreter);
   }
 } else {
   fname = path.dirname(fname) + path.sep + path.basename(fname, ".grace");
-  hopper.load(fname, function (error) {
-    if (error !== null) {
-      write.writeError(error).then(function () {
-        process.exit(1);
-      });
-    }
-  });
+  hopper.load(fname, writeAndExitOnError());
 }
