@@ -37,11 +37,8 @@
   , "email": "tim@zmthy.io"
   , "url": "http://zmthy.io"
   }
-, "license":
-  { "type": "GPL-3.0+"
-  , "url": "https://www.gnu.org/licenses/gpl-3.0.html"
-  }
+, "license": "GPL-3.0+"
 , "browserify":
-  { "transform": [ "brfs" ]
+  { "transform": ["brfs"]
   }
 }
