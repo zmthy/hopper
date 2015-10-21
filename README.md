@@ -10,7 +10,7 @@ hopper [FILENAME]
 ```
 
 Accepts an optional source file as an argument. If left off, the interactive
-REPL will load instead.
+REPL will load instead. Use the `-h` flag for information about extra arguments.
 
 ## Library
 
@@ -37,7 +37,7 @@ default that uses the Node.js file system interface.
 
 ## Licensing
 
-Copyright (C) 2014 Timothy Jones
+Copyright (C) 2014-2015 Timothy Jones
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
