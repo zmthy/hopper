@@ -1,4 +1,7 @@
-{ "env":
+{ "parserOptions":
+  { "sourceType": "module"
+  }
+, "env":
   { "node": true
   }
 , "rules":
@@ -36,7 +39,7 @@
   , "array-bracket-spacing": [2, "never"]
   , "object-curly-spacing": [2, "always"]
   , "space-before-function-paren": [2, { "named": "never" }]
-  , "space-after-keywords": 2
+  , "keyword-spacing": 2
   , "space-before-blocks": 2
   , "space-in-parens": 2
   , "spaced-comment": 2
