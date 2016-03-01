@@ -9,14 +9,14 @@ CheckResult = require("../lib/hopper").CheckResult;
 
 function toString(value) {
   if (!rt.isGraceObject(value)) {
-    return Task.resolve(value.toString());
+    return Promise.resolve(value.toString());
   }
 
-  return rt.apply(value, value.asString, [[]]).then(function (string) {
-    return rt.String.assert(string).then(function () {
+  return rt.apply(value, value.asString, [[]]).then((string) => {
+    return rt.String.assert(string).then(() => {
       return rt.apply(string, string.asPrimitiveString, [[]]);
     });
-  }).then(null, function (packet) {
+  }).then(null, (packet) => {
     // The object can't be stringified, so it can't be added to the trace.
     packet.object.stackTrace.push(rt.trace("asString", null));
     throw packet;
@@ -35,7 +35,7 @@ function writeError(error) {
   var isCheckResult = error.constructor === CheckResult;
 
   if (rt.isGraceObject(error) || isCheckResult) {
-    return toString(error).then(function (string) {
+    return toString(error).then((string) => {
       var stackTrace;
 
       writeRed(string);
@@ -44,23 +44,23 @@ function writeError(error) {
         stackTrace = isCheckResult ?
           error.stackTrace : error.object.stackTrace;
 
-        return Task.each(stackTrace, function (trace) {
-          return Task.resolve("\t").then(function (line) {
+        return Task.each(stackTrace, (trace) => {
+          return Promise.resolve("\t").then((line) => {
             if (trace.name !== null) {
               return line + "at «" + trace.name + "» ";
             }
 
             return line;
-          }).then(function (line) {
+          }).then((line) => {
             if (trace.object !== null) {
-              return toString(trace.object).then(function (object) {
+              return toString(trace.object).then((object) => {
                 return line + "in «" +
                   object.replace(/\n/g, "\n\t") + "» ";
               });
             }
 
             return line;
-          }).then(function (line) {
+          }).then((line) => {
             var loc = trace.location;
 
             if (loc !== null) {
@@ -72,19 +72,19 @@ function writeError(error) {
             }
 
             return line;
-          }).then(function (line) {
+          }).then((line) => {
             console.error(line.replace(/\s+$/g, ""));
           });
         });
       }
-    }).then(null, function () {
+    }).then(null, () => {
       writeRed("Internal Error: Failed to render exception");
     });
   }
 
   writeRed("Internal Error: " + (error.message || error));
 
-  return Task.resolve();
+  return Promise.resolve();
 }
 
 function writeValue(value) {
@@ -98,7 +98,7 @@ function writeValue(value) {
     writeGreen(value.toString());
   }
 
-  return Task.resolve();
+  return Promise.resolve();
 }
 
 exports.writeError = writeError;

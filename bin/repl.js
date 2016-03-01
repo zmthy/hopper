@@ -37,13 +37,9 @@ module.exports = function (interpreter) {
     if (line.replace(/\s/g, "") !== "") {
       interpreter.interpret("repl", line, function (error, result) {
         if (error !== null) {
-          write.writeError(error).callback(function () {
-            rl.prompt();
-          });
+          write.writeError(error).then(() => rl.prompt(), () => rl.prompt());
         } else {
-          write.writeValue(result).callback(function () {
-            rl.prompt();
-          });
+          write.writeValue(result).then(() => rl.prompt(), () => rl.prompt());
         }
       });
     } else {
